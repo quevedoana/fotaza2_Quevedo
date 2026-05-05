@@ -1,18 +1,28 @@
 doctype html
-html
-  head
-    meta(charset='UTF-8')
-    meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    block metadata
+html(lang="es")
+head
+meta(charset="UTF-8")
+meta(name="viewport", content="width=device-width, initial-scale=1.0")
+block metadata
+script(src="https://cdn.tailwindcss.com")
+body 
+  header
+    nav.flex.items.items-center.gap-8.bg-black.text-gray-400.h-10
 
-  body
-    nav
-      ul
-        li
-          a(href='/') Inicio
-        li
-          a(href='/login') Iniciar Sesión
-        li
-          a(href='/registro') Registrarse
-    main
-      block content
+      a.flex.items-center.gap-2.ms-2rem.ml-3.no-underline(href="/") Fotaza 2
+      
+        
+      form.flex.items-center.px-3.rounded-lg.bg-gray-800.mr-15rem.ml-auto(action="/search" method="GET")
+        input.bg-transparent.border-0(type="search" name="q" placeholder=" Buscar..." aria-label="Buscar")
+      
+      .nav-login.flex.items-center.gap-2.mr-3
+        span.bg-indigo-600.rounded-md
+          a.no-underline.text-lg.p-2(href="/login") Iniciar sesión
+        span.bg-indigo-600.rounded-md 
+          a.no-underline.text-lg.p-2(href="/registro") Registrarse
+main 
+    block content 
+
+
+
+
