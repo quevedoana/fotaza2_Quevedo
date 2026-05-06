@@ -4,4 +4,21 @@ block metadata
   title Iniciar Sesión
 
 block content
-  
+  div.flex.justify-center.items-center.min-h-screen
+    div.bg-gray-800.rounded-lg.p-6.w-full.max-w-sm
+      
+      h1.text-white.text-center.text-xl.mb-4.font-bold Iniciar sesión
+      
+      form.space-y-3(action="/login" method="POST")
+        div
+          label.text-gray-400.block.mb-1(for="email") Email:
+          input.w-full.rounded.bg-gray-700.text-gray-400.px-3.py-2(type="email" id="email" name="email")
+        
+        div
+          label.text-gray-400.block.mb-1(for="password") Contraseña:
+          input.w-full.rounded.bg-gray-700.text-gray-400.px-3.py-2(type="password" id="password" name="password")
+        
+        button.w-full.mt-3.rounded.bg-indigo-600.text-gray-200.py-2(type="submit") Iniciar sesión
+      
+      p.text-center.text-gray-400.text-sm.mt-4
+        a.text-indigo-400(href="/registro") ¿No tienes cuenta? Regístrate

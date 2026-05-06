@@ -5,21 +5,21 @@ meta(charset="UTF-8")
 meta(name="viewport", content="width=device-width, initial-scale=1.0")
 block metadata
 script(src="https://cdn.tailwindcss.com")
-body 
+body.bg-zinc-900
   header
     nav.flex.items.items-center.gap-8.bg-black.text-gray-400.h-10
 
-      a.flex.items-center.gap-2.ms-2rem.ml-3.no-underline(href="/") Fotaza 2
+      a.flex.items-center.gap-2.ms-2.ml-3.no-underline(href="/") Fotaza 2
       
         
-      form.flex.items-center.px-3.rounded-lg.bg-gray-800.mr-15rem.ml-auto(action="/search" method="GET")
+      form.flex.items-center.px-3.rounded-lg.bg-gray-800.mr-15.ml-auto(action="/search" method="GET")
         input.bg-transparent.border-0(type="search" name="q" placeholder=" Buscar..." aria-label="Buscar")
       
-      .nav-login.flex.items-center.gap-2.mr-3
+      nav.flex.items-center.gap-2.mr-3
         span.bg-indigo-600.rounded-md
-          a.no-underline.text-lg.p-2(href="/login") Iniciar sesión
+          a.no-underline.text-lg.p-2.text-gray-200.text-sm.mt-4(href="/login") Iniciar sesión
         span.bg-indigo-600.rounded-md 
-          a.no-underline.text-lg.p-2(href="/registro") Registrarse
+          a.no-underline.text-lg.p-2.text-gray-200.text-sm.mt-4(href="/registro") Registrarse
 main 
     block content 
 
