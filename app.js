@@ -1,7 +1,10 @@
 import 'dotenv/config'
 import express from 'express'
+import sequelize  from './db/config.js'
+import './models/sync.js'
 
 const PORT = process.env.PORT
+
 
 const app = express()
 
@@ -23,10 +26,18 @@ app.get('/registro', (req,res) =>{
     res.render('register')
 })
 
-app.listen(PORT, (err)=>{
+//conexion db
+sequelize.sync({ alter: true })
+.then( ()=>{
+    app.listen(PORT, (err)=>{
     if(err){
         console.error('error al iniciar el servidor:', err)
         return
     }
     console.log(`servidor escuchando en el puerto ${PORT}`)
 })
+})
+.catch((err)=>{
+    console.error("error al sincronizar bd",err)
+})
+
