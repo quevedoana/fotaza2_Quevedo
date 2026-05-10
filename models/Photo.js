@@ -2,39 +2,30 @@ import { Model, DataTypes } from "sequelize";
 import sequelize from "../db/config.js"
 
 
-class Post extends Model {}
+class Photo extends Model {}
 
-Post.init(
+Photo.init(
   {
-    idPost: {
+    idPhoto: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       unique:true,
       autoIncrement: true,
     },
-    description: {
-      type: DataTypes.STRING, 
+    copyright: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false, 
     },
-    idPhoto: {
-      type: DataTypes.BLOB,
-      allowNull: false,
-    },
-    idUser:{
+    postId:{
       type: DataTypes.INTEGER,
-      allowNull:false,
-      unique: true,
-    },
-    idPhoto:{
-      type:DataTypes.BLOB,
       allowNull: false,
-    }
+    },   
   },
   {
     sequelize, 
-    tableName: 'Posts',
+    tableName: 'Photos',
     createdAt: true,
   },
 );
-export default Post;
-
+export default Photo;
