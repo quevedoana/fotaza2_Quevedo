@@ -28,14 +28,6 @@ Post.init(
       type: DataTypes.INTEGER,
       allowNull:false,
       unique: true,
-    },
-    idPhoto:{
-      type:DataTypes.BLOB,
-      allowNull: false,
-    },
-    commentsActive:{
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
     }
   },
   {

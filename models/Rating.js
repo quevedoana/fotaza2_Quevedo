@@ -16,7 +16,7 @@ Rating.init(
     idPhoto: {
       type: DataTypes.INTEGER, 
     },
-    userId:{
+    idUser:{
       type: DataTypes.INTEGER,
       allowNull: false,
     }, 

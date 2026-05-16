@@ -17,10 +17,14 @@ Photo.init(
       type: DataTypes.BOOLEAN,
       allowNull: false, 
     },
-    postId:{
+    idPost:{
       type: DataTypes.INTEGER,
       allowNull: false,
-    },   
+    },
+    commentsActive:{
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    }   
   },
   {
     sequelize, 

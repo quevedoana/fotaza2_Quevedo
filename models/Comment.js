@@ -17,11 +17,11 @@ Comment.init(
       type: DataTypes.STRING,
       allowNull: false, 
     },
-    userId:{
+    idUser:{
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    photoId:{
+    idPhoto:{
       type:DataTypes.INTEGER,
       allowNull:false,
     }   
