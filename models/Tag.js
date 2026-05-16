@@ -21,8 +21,7 @@ Tag.init(
   {
     sequelize, 
     tableName: 'Tags',
-    createdAt: false,
-    deletedAt: false,
+    timestamps: false,
   },
 );
 export default Tag;

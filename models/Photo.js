@@ -25,7 +25,7 @@ Photo.init(
   {
     sequelize, 
     tableName: 'Photos',
-    createdAt: true,
+    timestamps: true,
   },
 );
 export default Photo;

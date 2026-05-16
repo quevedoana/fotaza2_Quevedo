@@ -17,14 +17,12 @@ Follower.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       unique:true,
-      autoIncrement: true,
     }
   },
   {
     sequelize, 
     tableName: 'Followers',
-    createdAt: true,
-    deletedAt: false,
+    timestamps: true,
   },
 );
 export default Follower;

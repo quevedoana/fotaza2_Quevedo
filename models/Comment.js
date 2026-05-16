@@ -20,12 +20,16 @@ Comment.init(
     userId:{
       type: DataTypes.INTEGER,
       allowNull: false,
-    },   
+    },
+    photoId:{
+      type:DataTypes.INTEGER,
+      allowNull:false,
+    }   
   },
   {
     sequelize, 
     tableName: 'Comments',
-    createdAt: true,
+    timestamps: true,
   },
 );
 export default Comment;

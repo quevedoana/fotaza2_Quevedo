@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import express from 'express'
 import sequelize  from './db/config.js'
-import './models/sync.js'
+import { connectDatabase } from './models/index.js'
 
 const PORT = process.env.PORT
 
@@ -27,8 +27,8 @@ app.get('/registro', (req,res) =>{
 })
 
 //conexion db
-sequelize.sync({ alter: true })
-.then( ()=>{
+connectDatabase()
+.then(()=>{
     app.listen(PORT, (err)=>{
     if(err){
         console.error('error al iniciar el servidor:', err)
