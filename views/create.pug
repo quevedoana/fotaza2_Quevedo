@@ -1,0 +1,30 @@
+extends layout.pug 
+
+block content
+  div.flex.justify-center.items-center.min-h-screen.py-8
+    div.bg-gray-800.rounded-lg.p-6.w-full.max-w-2xl
+      
+      h1.text-white.text-center.text-xl.mb-6.font-bold Nueva Publicación
+      
+      form.space-y-4(action='/publicaciones/crear', method='POST', enctype='multipart/form-data')
+        div
+          label.text-gray-400.block.mb-1(for='titulo') Título 
+          input.w-full.rounded.bg-gray-700.text-white.px-3.py-2(type='text',name='titulo',id='titulo',placeholder='Titulo de la publicación')
+        
+        div
+          label.text-gray-400.block.mb-1(for='descripcion') Descripción
+          textarea.w-full.rounded.bg-gray-700.text-white.px-3.py-2(name='descripcion',id='descripcion', rows='4', placeholder='Descripción...')
+        
+        div
+          label.text-gray-400.block.mb-1(for='imagenes') Imágenes 
+          input.w-full.rounded.bg-gray-700.text-gray-400.px-3.py-2(type='file',name='imagenes',id='imagenes',multiple)
+        
+        div
+          label.text-gray-400.block.mb-1(for='etiquetas') Etiquetas
+          input.w-full.rounded.bg-gray-700.text-white.px-3.py-2(type='text',name='etiquetas',id='etiquetas', placeholder='naturaleza, paisaje, atardecer')
+
+        div.flex.gap-3.pt-4
+          button.w-full.rounded.bg-indigo-600.text-gray-200.py-2(type='submit',class='hover:bg-indigo-700') Publicar
+          
+          a.w-full.text-center.rounded.bg-gray-600.text-gray-200.py-2(href='/publicaciones',class='hover:bg-gray-500') Cancelar
+      

@@ -26,6 +26,15 @@ app.get('/registro', (req,res) =>{
     res.render('register')
 })
 
+app.get('/publicaciones', (req,res) =>{
+    res.render('posts')
+})
+
+app.get('/publicaciones/crear', (req,res) =>{
+    res.render('create')
+})
+
+
 //conexion db
 connectDatabase()
 .then(()=>{
