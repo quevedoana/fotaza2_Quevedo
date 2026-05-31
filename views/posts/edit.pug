@@ -1,0 +1,52 @@
+extends ../layout.pug
+
+block metadata
+  title Editar Publicación
+
+block content
+  div.flex.justify-center.items-center.min-h-screen.py-8
+    div.bg-gray-800.rounded-lg.p-6.w-full.max-w-2xl
+
+      h1.text-white.text-center.text-xl.mb-6.font-bold Editar Publicación
+
+      form#formEditar.space-y-4(action=`/publicaciones/${post.idPost}/editar` method='POST')
+
+        div
+          label.text-gray-400.block.mb-1 Título
+          input.w-full.rounded.bg-gray-700.text-white.px-3.py-2(
+            type='text' name='titulo' value=post.title required)
+
+        div
+          label.text-gray-400.block.mb-1 Descripción
+          textarea.w-full.rounded.bg-gray-700.text-white.px-3.py-2(
+            name='descripcion' rows='4')= post.description
+
+                div
+          label.text-gray-400.block.mb-1 Imágenes actuales
+          div.flex.gap-2.flex-wrap.mb-2
+            if post.Photos && post.Photos.length
+              each foto in post.Photos
+                if foto.imageSrc
+                  img(src=foto.imageSrc style='width:80px; height:80px; object-fit:cover; border-radius:8px;')
+            else
+              span.text-gray-400 No hay imágenes actuales
+
+          label.text-gray-400.block.mb-1 Reemplazar imágenes (opcional)
+          input#imagenes(type='file' multiple accept='image/*')
+          div#preview.flex.gap-2.mt-2.flex-wrap
+          div#imagenesContainer
+
+        div
+          label.text-gray-400.block.mb-1 Etiquetas
+          input.w-full.rounded.bg-gray-700.text-white.px-3.py-2(
+            type='text' name='etiquetas' value=tagsString
+            placeholder='naturaleza, paisaje, atardecer')
+
+        div.flex.gap-3.pt-4
+          button.w-full.rounded.bg-indigo-600.text-gray-200.py-2(
+            type='submit') Guardar cambios
+          a.w-full.text-center.rounded.bg-gray-600.text-gray-200.py-2(
+            href='/publicaciones') Cancelar
+
+block scripts
+  script(src='/crearPublicaciones.js')

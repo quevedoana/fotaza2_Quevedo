@@ -56,35 +56,43 @@ export const postCrear = async (req, res) => {
   }
 };
 export const show = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params
+
   try {
     const post = await Post.findByPk(id, {
       include: [
-        { model: Photo, as: "Photos" },
-        { model: Tag, as: "Tags" },
+        { model: Photo, as: 'Photos' },
+        { model: Tag, as: 'Tags' },
       ],
-    });
+    })
 
     if (!post) {
       return res.status(404).send("Publicación no encontrada");
     }
 
-    const postConImagenes = {
-      ...post.toJSON(),
-      Photos: post.Photos.map((photo) => ({
-        ...photo.toJSON(),
-        imageSrc: photo.photo
-          ? `data:image/jpeg;base64,${Buffer.from(photo.photo).toString("base64")}`
-          : null,
-      })),
-    };
+    const postData = post.toJSON()
 
-    res.render("posts/show");
+    postData.Photos = postData.Photos.map((photo) => ({
+      ...photo,
+      imageSrc: photo.photo
+        ? `data:image/jpeg;base64,${Buffer.from(photo.photo).toString('base64')}`
+        : null,
+    }))
+
+    const fotos = postData.Photos
+      .map((p) => p.imageSrc)
+      .filter((f) => f !== null)
+
+
+    res.render('posts/show', {
+      post: postData,
+      fotos: JSON.stringify(fotos),
+    })
+
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error del servidor");
+    res.status(500).send('Error del servidor: ' + err.message)
   }
-};
+}
 
 export const index = async (req, res) => {
   try {

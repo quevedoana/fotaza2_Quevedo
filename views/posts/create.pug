@@ -1,0 +1,37 @@
+extends ../layout.pug
+
+block metadata
+  title Nueva Publicación
+
+block content
+  div.flex.justify-center.items-center.min-h-screen.py-8
+    div.bg-gray-800.rounded-lg.p-6.w-full.max-w-2xl
+
+      h1.text-white.text-center.text-xl.mb-6.font-bold Nueva Publicación
+
+      form#formPublicacion.space-y-4(action='/publicaciones/crear' method='POST')
+        div
+          label.text-gray-400.block.mb-1(for='titulo') Título
+          input#titulo.w-full.rounded.bg-gray-700.text-white.px-3.py-2(
+            type='text' name='titulo' placeholder='Título de la publicación' required)
+
+        div
+          label.text-gray-400.block.mb-1(for='descripcion') Descripción
+          textarea#descripcion.w-full.rounded.bg-gray-700.text-white.px-3.py-2(name='descripcion' rows='4' placeholder='Descripción...')
+
+        div
+          label.text-gray-400.block.mb-1 Imágenes
+          input#imagenes(type='file' multiple accept='image/*')
+          div#preview.flex.gap-2.mt-2.flex-wrap
+          div#imagenesContainer
+
+        div
+          label.text-gray-400.block.mb-1(for='etiquetas') Etiquetas
+          input#etiquetas.w-full.rounded.bg-gray-700.text-white.px-3.py-2(type='text' name='etiquetas' placeholder='naturaleza, paisaje, atardecer')
+
+        div.flex.gap-3.pt-4
+          button.w-full.rounded.bg-indigo-600.text-gray-200.py-2(type='submit') Publicar
+          a.w-full.text-center.rounded.bg-gray-600.text-gray-200.py-2(href='/publicaciones') Cancelar
+
+block scripts
+  script(src='/crearPublicaciones.js')

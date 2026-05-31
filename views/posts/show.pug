@@ -1,0 +1,89 @@
+extends ../layout
+
+block content
+  div.container.mx-auto.px-4.py-8
+    a.text-indigo-400.mb-4.inline-block(href='/publicaciones', class='hover:text-indigo-300')
+      | &larr; Volver a todas las publicaciones
+
+    if post
+      div.bg-gray-800.rounded-lg.overflow-hidden
+
+        if post.Photos && post.Photos.length > 0
+          div.p-4
+            div.relative.flex.items-center.justify-center
+
+              button#prev.absolute.left-2.bg-gray-700.text-white.rounded-full.w-10.h-10.flex.items-center.justify-center(
+                class='hover:bg-gray-600'
+              ) &#8592;
+
+              img#fotoActual.max-w-lg.mx-auto.block.rounded-lg.h-80.object-cover(
+                src=post.Photos[0].imageSrc
+                alt=post.title
+              )
+
+              button#next.absolute.right-2.bg-gray-700.text-white.rounded-full.w-10.h-10.flex.items-center.justify-center(
+                class='hover:bg-gray-600'
+              ) &#8594;
+
+            p.text-center.text-gray-500.text-sm.mt-2
+              span#indice 1
+              |  / #{post.Photos.length}
+
+        div.p-6
+          h1.text-white.text-2xl.font-bold.mb-4= post.title
+
+          if post.description
+            p.text-gray-400.mb-4= post.description
+
+          if post.Tags && post.Tags.length > 0
+            div.flex.flex-wrap.gap-2.mb-4
+              each tag in post.Tags
+                span.bg-gray-700.text-indigo-400.text-sm.px-3.py-1.rounded-full
+                  | ##{tag.nameTag}
+
+          p.text-gray-500.text-sm
+            | Publicado el: #{new Date(post.createdAt).toLocaleDateString()}
+
+          div.flex.gap-3.mt-6
+            a.bg-indigo-600.text-gray-200.rounded.px-4.py-2(
+              href=`/publicaciones/${post.idPost}/editar`
+              class='hover:bg-indigo-700 transition-colors'
+            ) Editar
+
+            form(action=`/publicaciones/${post.idPost}/eliminar` method='POST' onsubmit='return confirm("¿Eliminar esta publicación?")')
+              button.bg-red-600.text-gray-200.rounded.px-4.py-2(
+                type='submit'
+                class='hover:bg-red-700 transition-colors'
+              ) Eliminar
+
+    else
+      div.bg-red-900.text-red-200.p-4.rounded
+        p Publicación no encontrada
+
+    script.
+      var fotos = !{fotos};
+      var actual = 0;
+
+      function anterior() {
+        actual = actual - 1;
+        actual = actual < 0 ? fotos.length - 1 : actual;
+        document.getElementById('fotoActual').src = fotos[actual];
+        document.getElementById('indice').innerHTML = actual + 1;
+      }
+
+      function siguiente() {
+        actual = actual + 1;
+        actual = actual >= fotos.length ? 0 : actual;
+        document.getElementById('fotoActual').src = fotos[actual];
+        document.getElementById('indice').innerHTML = actual + 1;
+      }
+
+      var prevBtn = document.getElementById('prev');
+      var nextBtn = document.getElementById('next');
+
+      prevBtn.onclick = anterior;
+      nextBtn.onclick = siguiente;
+
+      var mostrarFlechas = fotos.length > 1;
+      prevBtn.style.display = mostrarFlechas ? 'flex' : 'none';
+      nextBtn.style.display = mostrarFlechas ? 'flex' : 'none';
