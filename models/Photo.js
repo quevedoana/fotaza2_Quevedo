@@ -24,11 +24,16 @@ Photo.init(
     commentsActive:{
       type: DataTypes.BOOLEAN,
       allowNull: false,
+    },
+    photo:{
+      type:DataTypes.BLOB('long'),
+      allowNull: false,
+
     }   
   },
   {
     sequelize, 
-    tableName: 'Photos',
+    tableName: 'photos',
     timestamps: true,
   },
 );

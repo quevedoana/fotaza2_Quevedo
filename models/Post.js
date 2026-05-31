@@ -10,7 +10,6 @@ Post.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
-      unique:true,
       autoIncrement: true,
     },
     title: {
@@ -20,15 +19,10 @@ Post.init(
     description: {
       type: DataTypes.STRING, 
     },
-    idPhoto: {
-      type: DataTypes.BLOB,
-      allowNull: false,
-    },
     idUser:{
       type: DataTypes.INTEGER,
       allowNull:false,
-      unique: true,
-    }
+    },
   },
   {
     sequelize, 
