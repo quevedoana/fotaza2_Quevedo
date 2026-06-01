@@ -4,6 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { connectDatabase } from './models/index.js'
 import postRoutes from './routes/postRoutes.js'
+import session from 'express-session'
+import authRoutes from './routes/authRoutes.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -11,6 +13,18 @@ const __dirname = path.dirname(__filename)
 const PORT = process.env.PORT
 
 const app = express()
+
+app.use(
+  session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}))
+
+app.use((req,res,next)=>{
+  res.locals.currentUser = req.session.user || null
+  next()
+})
 
 app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 app.use(express.json({ limit: '50mb' }))
@@ -22,14 +36,7 @@ app.set('views', './views')
 app.get('/', (req, res) => {
   res.render('index')
 })
-
-app.get('/login', (req, res) => {
-  res.render('login')
-})
-
-app.get('/registro', (req, res) => {
-  res.render('register')
-})
+app.use('/', authRoutes)
 
 app.use('/publicaciones', postRoutes)
 

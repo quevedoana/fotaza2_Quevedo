@@ -31,7 +31,8 @@ block content
 
         div.p-6
           h1.text-white.text-2xl.font-bold.mb-4= post.title
-
+          p.text-gray-500.mb-4
+            | Publicado por #{post.Author.userName}
           if post.description
             p.text-gray-400.mb-4= post.description
 
@@ -41,20 +42,44 @@ block content
                 span.bg-gray-700.text-indigo-400.text-sm.px-3.py-1.rounded-full
                   | ##{tag.nameTag}
 
-          p.text-gray-500.text-sm
+          div.mt-6
+            h3.text-white.text-lg.font-semibold.mb-3 Comentarios
+
+            if post.Photos[0].commentsActive
+              form(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios` method='POST')
+                div.flex.gap-2
+                  input.flex-1.rounded.bg-gray-700.text-white.px-3.py-2(
+                    type='text'
+                    name='description'
+                    placeholder='Escribí un comentario...'
+                    required
+                  )
+                  button.bg-indigo-600.text-white.rounded.px-4.py-2(type='submit') Comentar
+
+              form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/cerrar` method='POST')
+                button.text-red-400.text-sm(type='submit') Cerrar comentarios
+            else
+              p.text-gray-500.text-sm Comentarios cerrados
+
+            div.mt-4.space-y-2
+              each comment in post.Photos[0].Comments
+                div.bg-gray-700.rounded.px-3.py-2
+                  p.text-white.text-sm= comment.description
+                  p.text-gray-500.text-xs= new Date(comment.createdAt).toLocaleDateString()
+
+
+          p.text-gray-500.text-sm.mt-4
             | Publicado el: #{new Date(post.createdAt).toLocaleDateString()}
 
-          div.flex.gap-3.mt-6
-            a.bg-indigo-600.text-gray-200.rounded.px-4.py-2(
-              href=`/publicaciones/${post.idPost}/editar`
-              class='hover:bg-indigo-700 transition-colors'
-            ) Editar
+          if currentUser && currentUser.idUser === post.idUser
 
-            form(action=`/publicaciones/${post.idPost}/eliminar` method='POST' onsubmit='return confirm("¿Eliminar esta publicación?")')
-              button.bg-red-600.text-gray-200.rounded.px-4.py-2(
-                type='submit'
-                class='hover:bg-red-700 transition-colors'
-              ) Eliminar
+            div.flex.gap-3.mt-6
+
+              a.bg-indigo-600.text-gray-200.rounded.px-4.py-2( href=`/publicaciones/${post.idPost}/editar`) Editar
+
+              form(action=`/publicaciones/${post.idPost}/eliminar` method='POST')
+
+              button.bg-red-600.text-gray-200.rounded.px-4.py-2(type='submit') Eliminar
 
     else
       div.bg-red-900.text-red-200.p-4.rounded

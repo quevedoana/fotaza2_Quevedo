@@ -23,7 +23,8 @@ block content
             div.p-4
               a(href=`/publicaciones/${post.idPost}`)
                 h2.text-white.font-semibold.text-lg.mb-2(class='hover:text-indigo-400 transition-colors')= post.title
-              
+                p.text-gray-500.text-xs.mb-2
+                  | Por #{post.Author.userName}
               if post.description
                 p.text-gray-400.text-sm.mb-3= post.description
               
@@ -33,26 +34,21 @@ block content
                     span.bg-gray-700.text-indigo-400.text-xs.px-2.py-1.rounded-full ##{tag.nameTag}
               
               div.flex.gap-2.mt-2
-                a.flex-1.text-center.bg-indigo-600.text-gray-200.rounded.py-1.text-sm(
-                  href=`/publicaciones/${post.idPost}`,
-                  class='hover:bg-indigo-700 transition-colors'
-                ) Ver más
-                a.flex-1.text-center.bg-sky-600.text-gray-200.rounded.py-1.text-sm(
-                  href=`/publicaciones/${post.idPost}/editar`,
-                  class='hover:bg-sky-700 transition-colors'
-                ) Editar
-                form.flex-1(action=`/publicaciones/${post.idPost}/eliminar`, method='POST')
-                  button.w-full.bg-rose-600.text-gray-200.rounded.py-1.text-sm(
-                    type='submit',
-                    class='hover:bg-rose-700 transition-colors',
-                    onclick='return confirm("¿Eliminar esta publicación?")'
-                  ) Eliminar
+
+                a.flex-1.text-center.bg-indigo-600.text-gray-200.rounded.py-1.text-sm(href=`/publicaciones/${post.idPost}`) Ver más
+
+                if currentUser && currentUser.idUser === post.idUser
+
+                  a.flex-1.text-center.bg-sky-600.text-gray-200.rounded.py-1.text-sm(href=`/publicaciones/${post.idPost}/editar`) Editar
+
+                  form.flex-1(action=`/publicaciones/${post.idPost}/eliminar` method='POST')
+                    button.w-full.bg-rose-600.text-gray-200.rounded.py-1.text-sm(type='submit') Eliminar
 
     else
       div.bg-gray-800.rounded-lg.p-12.text-center
-        div.text-6xl.mb-4 📷
+        div.text-6xl.mb-4 
         p.text-gray-400.text-lg.mb-4 Aún no hay publicaciones
         a.bg-indigo-600.text-gray-200.rounded-lg.px-6.py-3.inline-block(
           href='/publicaciones/crear',
           class='hover:bg-indigo-700 transition-colors'
-        ) 📸 Crear primera publicación
+        )  Crear primera publicación

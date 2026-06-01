@@ -1,4 +1,4 @@
-import { Post, Photo, Tag } from "../models/index.js";
+import { Post, Photo, Tag, Comment, User } from "../models/index.js";
 
 export const getCrear = (req, res) => {
   res.render("posts/create");
@@ -15,7 +15,7 @@ export const postCrear = async (req, res) => {
     const post = await Post.create({
       title: titulo,
       description: descripcion,
-      idUser: 1,
+      idUser: req.session.user.idUser,
     });
 
     if (imagenesBase64) {
@@ -56,43 +56,46 @@ export const postCrear = async (req, res) => {
   }
 };
 export const show = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   try {
     const post = await Post.findByPk(id, {
       include: [
-        { model: Photo, as: 'Photos' },
-        { model: Tag, as: 'Tags' },
+        {
+          model: Photo,
+          as: "Photos",
+          include: [{ model: Comment, as: "Comments" }],
+        },
+        { model: Tag, as: "Tags" },
+        { model: User, as: "Author" },
       ],
-    })
+    });
 
     if (!post) {
-      return res.status(404).send("Publicación no encontrada");
+      return res.render("posts/show", { post: null, fotos: "[]" });
     }
 
-    const postData = post.toJSON()
+    const postData = post.toJSON();
 
     postData.Photos = postData.Photos.map((photo) => ({
       ...photo,
       imageSrc: photo.photo
-        ? `data:image/jpeg;base64,${Buffer.from(photo.photo).toString('base64')}`
+        ? `data:image/jpeg;base64,${Buffer.from(photo.photo).toString("base64")}`
         : null,
-    }))
+    }));
 
-    const fotos = postData.Photos
-      .map((p) => p.imageSrc)
-      .filter((f) => f !== null)
+    const fotos = postData.Photos.map((p) => p.imageSrc).filter(
+      (f) => f !== null,
+    );
 
-
-    res.render('posts/show', {
+    res.render("posts/show", {
       post: postData,
       fotos: JSON.stringify(fotos),
-    })
-
+    });
   } catch (err) {
-    res.status(500).send('Error del servidor: ' + err.message)
+    res.status(500).send("Error del servidor: " + err.message);
   }
-}
+};
 
 export const index = async (req, res) => {
   try {
@@ -100,6 +103,7 @@ export const index = async (req, res) => {
       include: [
         { model: Photo, as: "Photos", limit: 1 },
         { model: Tag, as: "Tags" },
+        { model: User, as: "Author" },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -134,7 +138,13 @@ export const getEditar = async (req, res) => {
       ],
     });
 
-    if (!post) return res.redirect("/publicaciones");
+    if (!post) {
+      return res.redirect("/publicaciones");
+    }
+
+    if (post.idUser !== req.session.user.idUser) {
+      return res.status(403).send("No autorizado");
+    }
 
     const postData = post.toJSON();
 
@@ -142,7 +152,7 @@ export const getEditar = async (req, res) => {
       ...photo,
       imageSrc: photo.photo
         ? `data:image/jpeg;base64,${Buffer.from(photo.photo).toString("base64")}`
-        : photo.filename || null,
+        : null,
     }));
 
     const tagsString = postData.Tags.map((t) => t.nameTag).join(", ");
@@ -162,8 +172,17 @@ export const postEditar = async (req, res) => {
   const { titulo, descripcion, etiquetas, imagenesBase64 } = req.body;
 
   try {
-    const post = await Post.findOne({ where: { idPost: req.params.id } });
-    if (!post) return res.redirect("/publicaciones");
+    const post = await Post.findOne({
+      where: { idPost: req.params.id },
+    });
+
+    if (!post) {
+      return res.redirect("/publicaciones");
+    }
+
+    if (post.idUser !== req.session.user.idUser) {
+      return res.status(403).send("No autorizado");
+    }
 
     await post.update({
       title: titulo,
@@ -178,10 +197,14 @@ export const postEditar = async (req, res) => {
         : [imagenesBase64];
 
       for (const base64 of imagenes) {
+        const base64Data = base64.split(",")[1] || base64;
+        const imageBuffer = Buffer.from(base64Data, "base64");
+
         await Photo.create({
           idPost: post.idPost,
-          filename: base64,
-          licenseType: "free",
+          photo: imageBuffer,
+          copyright: false,
+          commentsActive: true,
         });
       }
     }
@@ -193,7 +216,7 @@ export const postEditar = async (req, res) => {
         .filter((t) => t);
       for (const tagName of tags) {
         const [tag] = await Tag.findOrCreate({
-          where: { name: tagName.toLowerCase() },
+          where: { nameTag: tagName.toLowerCase() },
         });
         await post.addTag(tag);
       }
@@ -208,15 +231,29 @@ export const postEditar = async (req, res) => {
 
 export const eliminar = async (req, res) => {
   try {
-    const post = await Post.findOne({ where: { idPost: req.params.id } });
-    if (!post) return res.redirect("/publicaciones");
 
-    await Photo.destroy({ where: { idPost: post.idPost } });
+    const post = await Post.findOne({
+      where: { idPost: req.params.id }
+    });
+
+    if (!post) {
+      return res.redirect("/publicaciones");
+    }
+
+    if (post.idUser !== req.session.user.idUser) {
+      return res.status(403).send("No autorizado");
+    }
+
+    await Photo.destroy({
+      where: { idPost: post.idPost }
+    });
+
     await post.setTags([]);
 
     await post.destroy();
 
     res.redirect("/publicaciones");
+
   } catch (err) {
     console.error(err);
     res.redirect("/publicaciones");
