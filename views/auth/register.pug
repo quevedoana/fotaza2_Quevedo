@@ -1,4 +1,4 @@
-extends layout.pug
+extends ../layout.pug
 
 block metadata
   title Registrarse
@@ -8,6 +8,8 @@ block content
     div.bg-gray-800.rounded-lg.p-6.w-full.max-w-sm
       
       h1.text-white.text-center.text-xl.mb-4.font-bold Registro
+      if error
+        div.bg-red-900.border.border-red-600.text-red-200.rounded.p-3.mb-4= error
       
       form.space-y-3(action="/registro" method="POST")
         div

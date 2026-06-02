@@ -64,7 +64,18 @@ export const show = async (req, res) => {
         {
           model: Photo,
           as: "Photos",
-          include: [{ model: Comment, as: "Comments" }],
+          include: [
+            {
+              model: Comment,
+              as: "Comments",
+              include: [
+                {
+                  model: User,
+                  as: "Author",
+                },
+              ],
+            },
+          ],
         },
         { model: Tag, as: "Tags" },
         { model: User, as: "Author" },
@@ -231,9 +242,8 @@ export const postEditar = async (req, res) => {
 
 export const eliminar = async (req, res) => {
   try {
-
     const post = await Post.findOne({
-      where: { idPost: req.params.id }
+      where: { idPost: req.params.id },
     });
 
     if (!post) {
@@ -245,7 +255,7 @@ export const eliminar = async (req, res) => {
     }
 
     await Photo.destroy({
-      where: { idPost: post.idPost }
+      where: { idPost: post.idPost },
     });
 
     await post.setTags([]);
@@ -253,7 +263,6 @@ export const eliminar = async (req, res) => {
     await post.destroy();
 
     res.redirect("/publicaciones");
-
   } catch (err) {
     console.error(err);
     res.redirect("/publicaciones");

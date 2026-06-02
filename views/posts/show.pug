@@ -30,59 +30,87 @@ block content
               |  / #{post.Photos.length}
 
         div.p-6
+
           h1.text-white.text-2xl.font-bold.mb-4= post.title
-          p.text-gray-500.mb-4
-            | Publicado por #{post.Author.userName}
+
+          p.text-gray-500.mb-4 Publicado por #{post.Author.userName}
+
           if post.description
             p.text-gray-400.mb-4= post.description
 
           if post.Tags && post.Tags.length > 0
             div.flex.flex-wrap.gap-2.mb-4
+
               each tag in post.Tags
-                span.bg-gray-700.text-indigo-400.text-sm.px-3.py-1.rounded-full
-                  | ##{tag.nameTag}
+
+                span.bg-gray-700.text-indigo-400.text-sm.px-3.py-1.rounded-full ##{tag.nameTag}
 
           div.mt-6
+
             h3.text-white.text-lg.font-semibold.mb-3 Comentarios
 
             if post.Photos[0].commentsActive
-              form(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios` method='POST')
-                div.flex.gap-2
-                  input.flex-1.rounded.bg-gray-700.text-white.px-3.py-2(
-                    type='text'
-                    name='description'
-                    placeholder='Escribí un comentario...'
-                    required
-                  )
-                  button.bg-indigo-600.text-white.rounded.px-4.py-2(type='submit') Comentar
 
-              form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/cerrar` method='POST')
-                button.text-red-400.text-sm(type='submit') Cerrar comentarios
+              form(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios` method='POST')
+
+                div.flex.gap-2
+
+                  input.flex-1.rounded.bg-gray-700.text-white.px-3.py-2(type='text' name='description' placeholder='Escribí un comentario...' required)
+
+                  button.bg-indigo-600.text-white.rounded.px-4.py-2(class="hover:bg-indigo-700" type='submit') Comentar
+
+              if currentUser && currentUser.idUser === post.idUser
+
+                form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/cerrar` method='POST')
+
+
+                  button.text-rose-400.text-sm(class="hover:text-rose-300" type='submit') Cerrar comentarios
+
             else
+
               p.text-gray-500.text-sm Comentarios cerrados
 
-            div.mt-4.space-y-2
+              if currentUser && currentUser.idUser === post.idUser
+
+                form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/abrir` method='POST')
+
+
+                  button.text-green-400.text-sm(class="hover:text-green-300" type='submit') Abrir comentarios
+
+            div.mt-4.space-y-3
+
               each comment in post.Photos[0].Comments
-                div.bg-gray-700.rounded.px-3.py-2
-                  p.text-white.text-sm= comment.description
-                  p.text-gray-500.text-xs= new Date(comment.createdAt).toLocaleDateString()
 
+                div.bg-gray-700.border.border-gray-600.rounded-lg.p-3(class="hover:border-indigo-500.transition")
 
-          p.text-gray-500.text-sm.mt-4
-            | Publicado el: #{new Date(post.createdAt).toLocaleDateString()}
+                  div.flex.items-center.justify-between.mb-2
 
-          if currentUser && currentUser.idUser === post.idUser
+                    div.flex.items-center.gap-3
 
-            div.flex.gap-3.mt-6
+                      div.w-8.h-8.rounded-full.bg-indigo-600.flex.items-center.justify-center.text-white.font-semibold
 
-              a.bg-indigo-600.text-gray-200.rounded.px-4.py-2( href=`/publicaciones/${post.idPost}/editar`) Editar
+                      div
 
-              form(action=`/publicaciones/${post.idPost}/eliminar` method='POST')
+                        p.text-indigo-400.font-semibold.text-sm= comment.Author.userName
 
-              button.bg-red-600.text-gray-200.rounded.px-4.py-2(type='submit') Eliminar
+                        p.text-gray-500.text-xs= new Date(comment.createdAt).toLocaleString('es-AR')
+
+                  p.text-gray-100.text-sm.leading-relaxed= comment.description
+
+          p.text-gray-500.text-sm.mt-6 Publicado el: #{new Date(post.createdAt).toLocaleDateString()}
+
+            if currentUser && currentUser.idUser === post.idUser
+
+              div.flex.gap-3.mt-6
+
+                a.bg-indigo-600.text-gray-200.rounded.px-4.py-2(class="hover:bg-indigo-700" href=`/publicaciones/${post.idPost}/editar`) Editar
+
+                form(action=`/publicaciones/${post.idPost}/eliminar` method='POST')
+
+                  button.bg-rose-600.text-gray-200.rounded.px-4.py-2(class="hover:bg-rose-700" type='submit') Eliminar
 
     else
-      div.bg-red-900.text-red-200.p-4.rounded
+      div.bg-rose-900.text-rose-200.p-4.rounded
         p Publicación no encontrada
 
     script.

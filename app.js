@@ -16,7 +16,7 @@ const app = express()
 
 app.use(
   session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_KEY,
   resave: false,
   saveUninitialized: false
 }))

@@ -1,33 +1,39 @@
-import bcrypt from 'bcrypt'
-import { User } from '../models/index.js'
+import bcrypt from "bcrypt";
+import { User } from "../models/index.js";
 
 export const getLogin = (req, res) => {
-  res.render('login')
-}
+  res.render("auth/login");
+};
 
 export const getRegister = (req, res) => {
-  res.render('register')
-}
+  res.render("auth/register");
+};
 
 export const postRegister = async (req, res) => {
   try {
-    const {
-      email,
-      password,
-      fecha,
-      nombre,
-      usuario,
-    } = req.body
+    const { email, password, fecha, nombre, usuario } = req.body;
 
-    const existe = await User.findOne({
-      where: { email }
-    })
+    const existeEmail = await User.findOne({
+      where: { email },
+    });
 
-    if (existe) {
-      return res.send('Ya existe un usuario con ese email')
+    if (existeEmail) {
+      return res.render("register", {
+        error: "Ya existe una cuenta con ese email",
+      });
     }
 
-    const hash = await bcrypt.hash(password, 10)
+    const existeUsuario = await User.findOne({
+      where: { userName: usuario },
+    });
+
+    if (existeUsuario) {
+      return res.render("auth/register", {
+        error: "Ese nombre de usuario ya está en uso",
+      });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
 
     await User.create({
       email,
@@ -35,52 +41,48 @@ export const postRegister = async (req, res) => {
       birthDate: fecha,
       fullName: nombre,
       userName: usuario,
-    })
+    });
 
-    res.redirect('/login')
-
+    res.redirect("auth/login");
   } catch (err) {
-    console.error(err)
-    res.redirect('/registro')
+    console.error(err);
+
+    return res.render("register", {
+      error: "Ocurrió un error al registrarse",
+    });
   }
-}
+};
 
 export const postLogin = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
     const user = await User.findOne({
-      where: { email }
-    })
+      where: { email },
+    });
 
-    if (!user) {
-      return res.send('Usuario no encontrado')
-    }
+    const validPassword = await bcrypt.compare(password, user.password);
 
-    const validPassword = await bcrypt.compare(
-      password,
-      user.password
-    )
-
-    if (!validPassword) {
-      return res.send('Contraseña incorrecta')
+    if (!validPassword || !user) {
+      return res.render("auth/login", {
+        error: "el usuario o contraseña son incorrectos",
+      });
     }
 
     req.session.user = {
       idUser: user.idUser,
       userName: user.userName,
-    }
+    };
 
-    res.redirect('/publicaciones')
-
+    res.redirect("/publicaciones");
   } catch (err) {
-    console.error(err)
-    res.redirect('/login')
+    console.error(err);
+    res.redirect("/login");
   }
-}
+};
 
 export const logout = (req, res) => {
   req.session.destroy(() => {
-    res.redirect('/login')
-  })
-}
+    res.redirect("/login");
+  });
+};
