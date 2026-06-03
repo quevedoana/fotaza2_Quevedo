@@ -15,4 +15,5 @@ router.post('/:id/eliminar', postController.eliminar)
 router.post('/:idPost/fotos/:idPhoto/comentarios', commentController.agregar)
 router.post('/:idPost/fotos/:idPhoto/comentarios/cerrar', commentController.cerrar)
 router.post('/:idPost/fotos/:idPhoto/comentarios/abrir', commentController.abrir)
+router.post('/:idPost/fotos/:idPhoto/rating', authMiddleware,ratingController.valorar)
 export default router

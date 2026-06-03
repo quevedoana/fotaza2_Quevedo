@@ -1,4 +1,4 @@
-import { Post, Photo, Tag, Comment, User } from "../models/index.js";
+import { Post, Photo, Tag, Comment, User, Rating } from "../models/index.js";
 
 export const getCrear = (req, res) => {
   res.render("posts/create");
@@ -75,6 +75,10 @@ export const show = async (req, res) => {
                 },
               ],
             },
+            {
+              model: Rating,
+              as: "Ratings",
+            },
           ],
         },
         { model: Tag, as: "Tags" },
@@ -83,7 +87,10 @@ export const show = async (req, res) => {
     });
 
     if (!post) {
-      return res.render("posts/show", { post: null, fotos: "[]" });
+      return res.render("posts/show", {
+        post: null,
+        fotos: "[]",
+      });
     }
 
     const postData = post.toJSON();
@@ -95,14 +102,26 @@ export const show = async (req, res) => {
         : null,
     }));
 
-    const fotos = postData.Photos.map((p) => p.imageSrc).filter(
-      (f) => f !== null,
-    );
+    const fotos = postData.Photos
+      .map((p) => p.imageSrc)
+      .filter((f) => f !== null);
+
+    const ratings = postData.Photos[0]?.Ratings || [];
+
+    const promedio =
+      ratings.length > 0
+        ? (
+            ratings.reduce((sum, r) => sum + r.score, 0) /
+            ratings.length
+          ).toFixed(1)
+        : 0;
 
     res.render("posts/show", {
       post: postData,
       fotos: JSON.stringify(fotos),
+      promedio,
     });
+
   } catch (err) {
     res.status(500).send("Error del servidor: " + err.message);
   }

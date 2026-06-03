@@ -35,6 +35,22 @@ block content
 
           p.text-gray-500.mb-4 Publicado por #{post.Author.userName}
 
+          div.flex.items-center.gap-2.mb-4
+
+            span.text-yellow-400.text-xl ★
+
+            span.text-gray-300= `${promedio} / 5`
+
+            span.text-gray-500.text-sm (#{post.Photos[0].Ratings.length} votos)
+          if currentUser && currentUser.idUser !== post.idUser
+
+            form(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/rating` method='POST')
+
+              div.flex.gap-2.mb-4
+
+                each n in [1,2,3,4,5]
+
+                  button.text-2xl.text-yellow-600.transition(class="hover:text-yellow-100" type='submit' name='score' value=n) ★
           if post.description
             p.text-gray-400.mb-4= post.description
 
