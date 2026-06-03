@@ -57,6 +57,7 @@ export const postCrear = async (req, res) => {
 };
 export const show = async (req, res) => {
   const { id } = req.params;
+  const fotoIndex = Number(req.query.foto || 0);
 
   try {
     const post = await Post.findByPk(id, {
@@ -106,23 +107,29 @@ export const show = async (req, res) => {
       .map((p) => p.imageSrc)
       .filter((f) => f !== null);
 
-    const ratings = postData.Photos[0]?.Ratings || [];
+    const fotoActual =
+      postData.Photos[fotoIndex] || postData.Photos[0];
+
+    const ratings = fotoActual.Ratings || [];
 
     const promedio =
       ratings.length > 0
         ? (
-            ratings.reduce((sum, r) => sum + r.score, 0) /
+            ratings.reduce((sum, r) => sum + Number(r.score), 0) /
             ratings.length
           ).toFixed(1)
-        : 0;
+        : "0.0";
 
     res.render("posts/show", {
       post: postData,
       fotos: JSON.stringify(fotos),
+      fotoActual,
+      fotoIndex,
       promedio,
     });
 
   } catch (err) {
+    console.error(err);
     res.status(500).send("Error del servidor: " + err.message);
   }
 };

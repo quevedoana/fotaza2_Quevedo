@@ -17,7 +17,7 @@ block content
               ) &#8592;
 
               img#fotoActual.max-w-lg.mx-auto.block.rounded-lg.h-80.object-cover(
-                src=post.Photos[0].imageSrc
+                src=fotoActual.imageSrc
                 alt=post.title
               )
 
@@ -26,7 +26,7 @@ block content
               ) &#8594;
 
             p.text-center.text-gray-500.text-sm.mt-2
-              span#indice 1
+              span#indice #{fotoIndex + 1}
               |  / #{post.Photos.length}
 
         div.p-6
@@ -41,10 +41,10 @@ block content
 
             span.text-gray-300= `${promedio} / 5`
 
-            span.text-gray-500.text-sm (#{post.Photos[0].Ratings.length} votos)
+            span.text-gray-500.text-sm (#{fotoActual.Ratings.length} votos)
           if currentUser && currentUser.idUser !== post.idUser
 
-            form(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/rating` method='POST')
+            form(action=`/publicaciones/${post.idPost}/fotos/${fotoActual.idPhoto}/rating` method='POST')
 
               div.flex.gap-2.mb-4
 
@@ -65,9 +65,9 @@ block content
 
             h3.text-white.text-lg.font-semibold.mb-3 Comentarios
 
-            if post.Photos[0].commentsActive
+            if fotoActual.commentsActive
 
-              form(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios` method='POST')
+              form(action=`/publicaciones/${post.idPost}/fotos/${fotoActual.idPhoto}/comentarios` method='POST')
 
                 div.flex.gap-2
 
@@ -77,7 +77,7 @@ block content
 
               if currentUser && currentUser.idUser === post.idUser
 
-                form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/cerrar` method='POST')
+                form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${fotoActual.idPhoto}/comentarios/cerrar` method='POST')
 
 
                   button.text-rose-400.text-sm(class="hover:text-rose-300" type='submit') Cerrar comentarios
@@ -88,14 +88,14 @@ block content
 
               if currentUser && currentUser.idUser === post.idUser
 
-                form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/abrir` method='POST')
+                form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${fotoActual.idPhoto}/comentarios/abrir` method='POST')
 
 
                   button.text-green-400.text-sm(class="hover:text-green-300" type='submit') Abrir comentarios
 
             div.mt-4.space-y-3
 
-              each comment in post.Photos[0].Comments
+              each comment in fotoActual.Comments
 
                 div.bg-gray-700.border.border-gray-600.rounded-lg.p-3(class="hover:border-indigo-500.transition")
 
@@ -131,21 +131,25 @@ block content
 
     script.
       var fotos = !{fotos};
-      var actual = 0;
+      var actual = #{fotoIndex};
 
       function anterior() {
-        actual = actual - 1;
-        actual = actual < 0 ? fotos.length - 1 : actual;
-        document.getElementById('fotoActual').src = fotos[actual];
-        document.getElementById('indice').innerHTML = actual + 1;
+        actual--;
+        if (actual < 0) {
+          actual = fotos.length - 1;
+        }
+
+        window.location.href ='/publicaciones/#{post.idPost}?foto=' + actual;
       }
 
       function siguiente() {
-        actual = actual + 1;
-        actual = actual >= fotos.length ? 0 : actual;
-        document.getElementById('fotoActual').src = fotos[actual];
-        document.getElementById('indice').innerHTML = actual + 1;
-      }
+        actual++;
+        if (actual >= fotos.length) {
+          actual = 0;
+        }
+
+        window.location.href ='/publicaciones/#{post.idPost}?foto=' + actual;
+        }
 
       var prevBtn = document.getElementById('prev');
       var nextBtn = document.getElementById('next');
