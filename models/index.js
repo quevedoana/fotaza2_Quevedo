@@ -51,14 +51,14 @@ Rating.belongsTo(User, { foreignKey: 'idUser', as: 'User' })
 User.belongsToMany(User, {
     through: Follower,
     as: 'Following',        
-    foreignKey: 'idFollower',
-    otherKey: 'idFollowee',
+    foreignKey: 'followerId',
+    otherKey: 'followeeId',
 })
 User.belongsToMany(User, {
     through: Follower,
     as: 'Followers',        
-    foreignKey: 'idFollowee',
-    otherKey: 'idFollower',
+    foreignKey: 'followeeId',
+    otherKey: 'followerId',
 })
 
 export async function connectDatabase() {

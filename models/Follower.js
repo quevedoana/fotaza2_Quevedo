@@ -1,28 +1,27 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../db/config.js"
 
-
 class Follower extends Model {}
 
 Follower.init(
   {
-    idFollower: {
+    followerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
-      unique:true,
-      autoIncrement: true,
     },
-    idFollowee: {
+
+    followeeId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      unique:true,
-    }
+      primaryKey: true,
+    },
   },
   {
-    sequelize, 
-    tableName: 'Followers',
+    sequelize,
+    tableName: "Followers",
     timestamps: true,
-  },
+  }
 );
+
 export default Follower;
