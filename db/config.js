@@ -8,7 +8,7 @@ const sequelize = new Sequelize({
     password:process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
 
-      ddialectOptions:
+      dialectOptions:
     process.env.NODE_ENV === "production"
       ? {
           ssl: {
