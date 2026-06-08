@@ -6,6 +6,7 @@ import { connectDatabase } from './models/index.js'
 import postRoutes from './routes/postRoutes.js'
 import session from 'express-session'
 import authRoutes from './routes/authRoutes.js'
+import * as searchController from "./controllers/searchController.js";
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -36,6 +37,9 @@ app.set('views', './views')
 app.get('/', (req, res) => {
   res.render('index')
 })
+
+app.get('/search', searchController.buscar)
+
 app.use('/', authRoutes)
 
 app.use('/publicaciones', postRoutes)

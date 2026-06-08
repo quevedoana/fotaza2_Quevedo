@@ -3,6 +3,7 @@ import * as postController from '../controllers/postController.js'
 import * as commentController from '../controllers/commentController.js'
 import { authMiddleware } from '../middleware/authMiddleware.js'
 import * as ratingController from '../controllers/ratingController.js'
+
 const router = express.Router()
 
 router.get('/', postController.index)
