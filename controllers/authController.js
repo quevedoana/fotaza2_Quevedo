@@ -13,6 +13,18 @@ export const postRegister = async (req, res) => {
   try {
     const { email, password, fecha, nombre, usuario } = req.body;
 
+    if (
+      !email?.trim() ||
+      !password?.trim() ||
+      !fecha?.trim() ||
+      !nombre?.trim() ||
+      !usuario?.trim()
+    ) {
+      return res.render("auth/register", {
+        error: "Todos los campos son obligatorios",
+      });
+    }
+
     const existeEmail = await User.findOne({
       where: { email },
     });
@@ -44,7 +56,6 @@ export const postRegister = async (req, res) => {
     });
 
     res.redirect("/login");
-
   } catch (err) {
     console.error(err);
 
@@ -68,10 +79,7 @@ export const postLogin = async (req, res) => {
       });
     }
 
-    const validPassword = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
       return res.render("auth/login", {
@@ -85,7 +93,6 @@ export const postLogin = async (req, res) => {
     };
 
     res.redirect("/");
-
   } catch (err) {
     console.error(err);
     res.redirect("/login");

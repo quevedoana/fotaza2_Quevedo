@@ -6,8 +6,8 @@ import { connectDatabase } from './models/index.js'
 import postRoutes from './routes/postRoutes.js'
 import session from 'express-session'
 import authRoutes from './routes/authRoutes.js'
-import * as searchController from "./controllers/searchController.js";
-import * as homeController from "./controllers/homeController.js";
+import mainRouter from './routes/index.js'
+
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -35,11 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.set('view engine', 'pug')
 app.set('views', './views')
 
-app.get('/', homeController.index)
-
-app.get('/search', searchController.buscar)
-
-app.use('/', authRoutes)
+app.use('/', mainRouter)
 
 app.use('/publicaciones', postRoutes)
 

@@ -26,7 +26,7 @@ inputImagenes.addEventListener('change', (e) => {
 
       const input = document.createElement('input')
       input.type = 'hidden'
-      input.name = 'imagenesBase64'   // array de base64
+      input.name = 'imagenesBase64'   
       input.value = base64
       container.appendChild(input)
 
