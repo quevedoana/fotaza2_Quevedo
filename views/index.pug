@@ -1,8 +1,74 @@
-extends layout.pug 
+extends layout
 
-block metadata 
-    title Home 
+block metadata
+  title Inicio
 
-block content 
-    h1 HOME 
-    
+block content
+
+  div.container.mx-auto.max-w-7xl.px-4.py-8
+
+    if feed
+
+      h1.text-white.text-4xl.font-bold.mb-2
+        | Tu feed
+
+      if !siguePersonas
+
+        div.bg-gray-800.rounded-xl.p-6.mb-8
+
+          p.text-gray-300.text-lg
+            | Todavía no seguís a nadie.
+
+          p.text-gray-500.mt-2
+            | Mientras tanto te mostramos publicaciones para descubrir usuarios.
+
+      else
+
+        p.text-gray-400.mb-8
+          | Publicaciones de las personas que seguís.
+
+    else
+
+      h1.text-white.text-4xl.font-bold.mb-2
+        | Explorar publicaciones
+
+      p.text-gray-400.mb-8
+        | Descubrí contenido creado por la comunidad.
+
+    if posts.length > 0
+
+      div.grid.gap-6(
+        class="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+      )
+
+        each post in posts
+
+          a.block.bg-gray-800.rounded-xl.overflow-hidden.no-underline(
+            href=`/publicaciones/${post.idPost}`
+          )
+
+            if post.portada
+
+              img.w-full.h-72.object-cover(
+                src=post.portada
+              )
+
+            div.p-4
+
+              h2.text-white.text-xl.font-bold.mb-2
+                = post.title
+
+              if post.description
+
+                p.text-gray-400.text-sm.mb-3
+                  = post.description
+
+              p.text-indigo-400.font-medium
+                = post.Author.userName
+
+    else
+
+      div.bg-gray-800.rounded-xl.p-10.text-center
+
+        p.text-gray-300.text-xl
+          | No hay publicaciones para mostrar.
