@@ -25,6 +25,19 @@ block content
                 h2.text-white.font-semibold.text-lg.mb-2(class='hover:text-indigo-400 transition-colors')= post.title
                 p.text-gray-500.text-xs.mb-2
                   | Por #{post.Author.userName}
+                div.flex.gap-4.text-sm.mb-3
+
+                  if post.promedioRating
+
+                    span.text-yellow-400
+                      | Valoraciones: #{post.promedioRating}
+
+                  else
+
+                    span.text-gray-500
+                      | Valoraciones: Sin valoraciones
+
+                  
               if post.description
                 p.text-gray-400.text-sm.mb-3= post.description
               
@@ -41,7 +54,8 @@ block content
 
                   a.flex-1.text-center.bg-sky-600.text-gray-200.rounded.py-1.text-sm(href=`/publicaciones/${post.idPost}/editar`) Editar
 
-                  form.flex-1(action=`/publicaciones/${post.idPost}/eliminar` method='POST')
+                  form.flex-1(action=`/publicaciones/${post.idPost}/eliminar` method='POST' onsubmit="return confirm('¿Seguro que querés eliminar esta publicación?')")
+
                     button.w-full.bg-rose-600.text-gray-200.rounded.py-1.text-sm(type='submit') Eliminar
 
     else
