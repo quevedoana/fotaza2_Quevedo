@@ -7,6 +7,18 @@ const sequelize = new Sequelize({
     database:process.env.DB_NAME,
     password:process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
+
+      ddialectOptions:
+    process.env.NODE_ENV === "production"
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : {},
 })
+
+
 
 export default sequelize

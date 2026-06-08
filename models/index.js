@@ -65,7 +65,7 @@ export async function connectDatabase() {
   try {
     await sequelize.authenticate();
     console.log("conexion a bd establecida");
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log("sincronizando los modelos");
   } catch (err) {
     console.error("error en la conexion a la bd", err);
