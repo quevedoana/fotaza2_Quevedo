@@ -9,6 +9,10 @@ block content
 
       h1.text-white.text-center.text-xl.mb-6.font-bold Nueva Publicación
 
+      if error
+
+        div.bg-red-600.text-white.rounded-lg.p-3.mb-4.text-center= error
+
       form#formPublicacion.space-y-4(action='/publicaciones/crear' method='POST')
         div
           label.text-gray-400.block.mb-1(for='titulo') Título

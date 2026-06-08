@@ -19,7 +19,7 @@ export const index = async (req, res) => {
             as: "Author",
           },
         ],
-        order: sequelize.random(),
+        order: sequelize.literal("RANDOM()"),
         limit: 12,
       });
 
@@ -90,7 +90,7 @@ export const index = async (req, res) => {
             as: "Author",
           },
         ],
-        order: sequelize.random(),
+        order: sequelize.literal("RANDOM()"),
         limit: 12,
       });
 

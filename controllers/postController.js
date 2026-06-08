@@ -8,9 +8,16 @@ export const postCrear = async (req, res) => {
   const { titulo, descripcion, etiquetas, imagenesBase64 } = req.body;
 
   if (!imagenesBase64) {
-    console.log("no se subió ninguna imagen");
-    return res.redirect("/publicaciones/crear");
+    return res.render("posts/create", {
+      error: "Debés subir al menos una imagen",
+    });
   }
+  if (!titulo?.trim()) {
+    return res.render("posts/create", {
+      error: "El título es obligatorio",
+    });
+  }
+
   try {
     const post = await Post.create({
       title: titulo,
@@ -103,12 +110,11 @@ export const show = async (req, res) => {
         : null,
     }));
 
-    const fotos = postData.Photos
-      .map((p) => p.imageSrc)
-      .filter((f) => f !== null);
+    const fotos = postData.Photos.map((p) => p.imageSrc).filter(
+      (f) => f !== null,
+    );
 
-    const fotoActual =
-      postData.Photos[fotoIndex] || postData.Photos[0];
+    const fotoActual = postData.Photos[fotoIndex] || postData.Photos[0];
 
     const ratings = fotoActual.Ratings || [];
 
@@ -127,7 +133,6 @@ export const show = async (req, res) => {
       fotoIndex,
       promedio,
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).send("Error del servidor: " + err.message);
@@ -136,7 +141,6 @@ export const show = async (req, res) => {
 
 export const index = async (req, res) => {
   try {
-
     const posts = await Post.findAll({
       include: [
         {
@@ -166,7 +170,6 @@ export const index = async (req, res) => {
     });
 
     const postsConImagenes = posts.map((post) => {
-
       const data = post.toJSON();
 
       data.Photos = data.Photos.map((photo) => ({
@@ -181,16 +184,14 @@ export const index = async (req, res) => {
       let sumaRatings = 0;
 
       data.Photos.forEach((photo) => {
-
         totalComentarios += photo.Comments?.length || 0;
 
         if (photo.Ratings?.length) {
-
           totalRatings += photo.Ratings.length;
 
           sumaRatings += photo.Ratings.reduce(
             (sum, r) => sum + Number(r.score),
-            0
+            0,
           );
         }
       });
@@ -198,9 +199,7 @@ export const index = async (req, res) => {
       data.cantidadComentarios = totalComentarios;
 
       data.promedioRating =
-        totalRatings > 0
-          ? (sumaRatings / totalRatings).toFixed(1)
-          : null;
+        totalRatings > 0 ? (sumaRatings / totalRatings).toFixed(1) : null;
 
       return data;
     });
@@ -209,7 +208,6 @@ export const index = async (req, res) => {
       title: "Publicaciones",
       posts: postsConImagenes,
     });
-
   } catch (err) {
     console.error(err);
 
@@ -219,7 +217,6 @@ export const index = async (req, res) => {
     });
   }
 };
-
 
 export const getEditar = async (req, res) => {
   try {

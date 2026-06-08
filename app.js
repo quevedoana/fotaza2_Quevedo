@@ -3,9 +3,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { connectDatabase } from './models/index.js'
-import postRoutes from './routes/postRoutes.js'
 import session from 'express-session'
-import authRoutes from './routes/authRoutes.js'
 import mainRouter from './routes/index.js'
 
 
@@ -37,7 +35,7 @@ app.set('views', './views')
 
 app.use('/', mainRouter)
 
-app.use('/publicaciones', postRoutes)
+
 
 connectDatabase()
   .then(() => {
