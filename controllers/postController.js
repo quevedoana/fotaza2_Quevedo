@@ -136,34 +136,90 @@ export const show = async (req, res) => {
 
 export const index = async (req, res) => {
   try {
+
     const posts = await Post.findAll({
       include: [
-        { model: Photo, as: "Photos", limit: 1 },
-        { model: Tag, as: "Tags" },
-        { model: User, as: "Author" },
+        {
+          model: Photo,
+          as: "Photos",
+          include: [
+            {
+              model: Comment,
+              as: "Comments",
+            },
+            {
+              model: Rating,
+              as: "Ratings",
+            },
+          ],
+        },
+        {
+          model: Tag,
+          as: "Tags",
+        },
+        {
+          model: User,
+          as: "Author",
+        },
       ],
       order: [["createdAt", "DESC"]],
     });
 
-    const postsConImagenes = posts.map((post) => ({
-      ...post.toJSON(),
-      Photos: post.Photos.map((photo) => ({
-        ...photo.toJSON(),
+    const postsConImagenes = posts.map((post) => {
+
+      const data = post.toJSON();
+
+      data.Photos = data.Photos.map((photo) => ({
+        ...photo,
         imageSrc: photo.photo
           ? `data:image/jpeg;base64,${Buffer.from(photo.photo).toString("base64")}`
           : null,
-      })),
-    }));
+      }));
+
+      let totalComentarios = 0;
+      let totalRatings = 0;
+      let sumaRatings = 0;
+
+      data.Photos.forEach((photo) => {
+
+        totalComentarios += photo.Comments?.length || 0;
+
+        if (photo.Ratings?.length) {
+
+          totalRatings += photo.Ratings.length;
+
+          sumaRatings += photo.Ratings.reduce(
+            (sum, r) => sum + Number(r.score),
+            0
+          );
+        }
+      });
+
+      data.cantidadComentarios = totalComentarios;
+
+      data.promedioRating =
+        totalRatings > 0
+          ? (sumaRatings / totalRatings).toFixed(1)
+          : null;
+
+      return data;
+    });
 
     res.render("posts/index", {
       title: "Publicaciones",
       posts: postsConImagenes,
     });
+
   } catch (err) {
     console.error(err);
-    res.render("posts/index", { title: "Publicaciones", posts: [] });
+
+    res.render("posts/index", {
+      title: "Publicaciones",
+      posts: [],
+    });
   }
 };
+
 
 export const getEditar = async (req, res) => {
   try {

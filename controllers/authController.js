@@ -18,7 +18,7 @@ export const postRegister = async (req, res) => {
     });
 
     if (existeEmail) {
-      return res.render("register", {
+      return res.render("auth/register", {
         error: "Ya existe una cuenta con ese email",
       });
     }
@@ -43,11 +43,12 @@ export const postRegister = async (req, res) => {
       userName: usuario,
     });
 
-    res.redirect("auth/login");
+    res.redirect("/login");
+
   } catch (err) {
     console.error(err);
 
-    return res.render("register", {
+    return res.render("auth/register", {
       error: "Ocurrió un error al registrarse",
     });
   }
@@ -61,11 +62,20 @@ export const postLogin = async (req, res) => {
       where: { email },
     });
 
-    const validPassword = await bcrypt.compare(password, user.password);
-
-    if (!validPassword || !user) {
+    if (!user) {
       return res.render("auth/login", {
-        error: "el usuario o contraseña son incorrectos",
+        error: "El usuario o contraseña son incorrectos",
+      });
+    }
+
+    const validPassword = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!validPassword) {
+      return res.render("auth/login", {
+        error: "El usuario o contraseña son incorrectos",
       });
     }
 
@@ -74,7 +84,8 @@ export const postLogin = async (req, res) => {
       userName: user.userName,
     };
 
-    res.redirect("/publicaciones");
+    res.redirect("/");
+
   } catch (err) {
     console.error(err);
     res.redirect("/login");
