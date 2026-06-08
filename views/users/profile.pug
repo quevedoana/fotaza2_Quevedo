@@ -1,0 +1,92 @@
+extends ../layout
+
+block content
+
+  div.container.mx-auto.px-4.py-8
+
+    div.bg-gray-800.rounded-xl.p-8.mb-8
+
+      div.flex.items-center.gap-6
+
+        div.w-24.h-24.rounded-full.bg-indigo-600
+
+        div.flex-1
+
+          h1.text-4xl.font-bold.text-white.mb-1
+            = userProfile.userName
+
+          p.text-gray-400.text-lg
+            = userProfile.fullName
+          if currentUser && currentUser.idUser !== userProfile.idUser
+
+            if yaLoSigo
+
+                form.mt-4(action=`/perfil/${userProfile.idUser}/dejar-seguir` method='POST')
+
+                    button.bg-red-600.text-white.rounded-lg.px-4.py-2(class="hover:bg-red-700") Dejar de seguir
+
+            else
+
+                form.mt-4(action=`/perfil/${userProfile.idUser}/seguir` method='POST')
+
+                    button.bg-indigo-600.text-white.rounded-lg.px-4.py-2(class="hover:bg-indigo-700") Seguir  
+
+          div.flex.gap-10.mt-6
+
+            div.text-center
+
+              p.text-indigo-400.text-2xl.font-bold
+                = userProfile.Posts.length
+
+              p.text-gray-400.text-sm Publicaciones
+
+            div.text-center
+
+              p.text-indigo-400.text-2xl.font-bold
+                = seguidores
+
+              p.text-gray-400.text-sm Seguidores
+
+            div.text-center
+
+              p.text-indigo-400.text-2xl.font-bold
+                = seguidos
+
+              p.text-gray-400.text-sm Seguidos
+
+    h2.text-white.text-2xl.font-bold.mb-4
+      Publicaciones
+
+    if userProfile.Posts.length > 0
+
+      div.grid.gap-4(
+        class="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+      )
+
+        each post in userProfile.Posts
+
+          a.bg-gray-800.rounded-lg.overflow-hidden.no-underline.transition(
+            href=`/publicaciones/${post.idPost}`
+            class="hover:scale-[1.02] hover:shadow-lg"
+          )
+
+            if post.portada
+
+              img.w-full.h-56.object-cover(
+                src=post.portada
+              )
+
+            div.p-4
+
+              h3.text-white.font-semibold.text-lg
+                = post.title
+
+              p.text-gray-500.text-sm.mt-1
+                = new Date(post.createdAt).toLocaleDateString()
+
+    else
+
+      div.bg-gray-800.rounded-lg.p-8.text-center
+
+        p.text-gray-400
+          Este usuario todavía no tiene publicaciones.

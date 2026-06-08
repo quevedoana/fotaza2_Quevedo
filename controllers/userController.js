@@ -1,4 +1,4 @@
-import { User, Post, Photo } from "../models/index.js";
+import { User, Post, Photo, Follower } from "../models/index.js";
 
 export const perfil = async (req, res) => {
   try {
@@ -35,8 +35,36 @@ export const perfil = async (req, res) => {
           : null,
     }));
 
+    const seguidores = await Follower.count({
+      where: {
+        followeeId: id,
+      },
+    });
+
+    const seguidos = await Follower.count({
+      where: {
+        followerId: id,
+      },
+    });
+
+    let yaLoSigo = false;
+
+    if (req.session.user) {
+      const relacion = await Follower.findOne({
+        where: {
+          followerId: req.session.user.idUser,
+          followeeId: id,
+        },
+      });
+
+      yaLoSigo = !!relacion;
+    }
+
     res.render("users/profile", {
       userProfile: userData,
+      seguidores,
+      seguidos,
+      yaLoSigo,
     });
 
   } catch (err) {

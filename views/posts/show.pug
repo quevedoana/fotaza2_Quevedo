@@ -33,7 +33,15 @@ block content
 
           h1.text-white.text-2xl.font-bold.mb-4= post.title
 
-          p.text-gray-500.mb-4 Publicado por #{post.Author.userName}
+          p.text-gray-500.mb-4
+
+            | Publicado por
+
+          a.text-indigo-400.ml-1(
+            href=`/perfil/${post.Author.idUser}`
+            class='hover:text-indigo-300'
+          ) 
+            = post.Author.userName
 
           div.flex.items-center.gap-2.mb-4
 
