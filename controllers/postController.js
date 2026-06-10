@@ -238,6 +238,10 @@ export const getEditar = async (req, res) => {
 
     const postData = post.toJSON();
 
+    postData.description = postData.description
+  ? postData.description.replaceAll("<div></div>", "")
+  : "";
+
     postData.Photos = postData.Photos.map((photo) => ({
       ...photo,
       imageSrc: photo.photo
@@ -259,65 +263,45 @@ export const getEditar = async (req, res) => {
 };
 
 export const postEditar = async (req, res) => {
-  const { titulo, descripcion, etiquetas, imagenesBase64 } = req.body;
+  const { titulo, descripcion, etiquetas } = req.body
+
+  const descripcionLimpia = descripcion
+    ? descripcion.replace(/<[^>]*>/g, '').trim()
+    : null
 
   try {
-    const post = await Post.findOne({
-      where: { idPost: req.params.id },
-    });
-
-    if (!post) {
-      return res.redirect("/publicaciones");
-    }
+    const post = await Post.findOne({ where: { idPost: req.params.id } })
+    if (!post) return res.redirect('/publicaciones')
 
     if (post.idUser !== req.session.user.idUser) {
-      return res.status(403).send("No autorizado");
+      return res.status(403).send('No autorizado')
     }
 
     await post.update({
       title: titulo,
-      description: descripcion,
-    });
-    //PREGUNTAR SI LAS IMAGENES SE EDITAN O SOLO EL TITULO Y LA DESCRIPCION
-    if (imagenesBase64) {
-      await Photo.destroy({ where: { idPost: post.idPost } });
+      description: descripcionLimpia,
+    })
 
-      const imagenes = Array.isArray(imagenesBase64)
-        ? imagenesBase64
-        : [imagenesBase64];
-
-      for (const base64 of imagenes) {
-        const base64Data = base64.split(",")[1] || base64;
-        const imageBuffer = Buffer.from(base64Data, "base64");
-
-        await Photo.create({
-          idPost: post.idPost,
-          photo: imageBuffer,
-          copyright: false,
-          commentsActive: true,
-        });
-      }
-    }
     if (etiquetas) {
-      await post.setTags([]);
-      const tags = etiquetas
-        .split(",")
-        .map((t) => t.trim())
-        .filter((t) => t);
+      await post.setTags([])
+
+      const tags = etiquetas.split(',').map(t => t.trim()).filter(t => t)
       for (const tagName of tags) {
         const [tag] = await Tag.findOrCreate({
-          where: { nameTag: tagName.toLowerCase() },
-        });
-        await post.addTag(tag);
+          where: { nameTag: tagName.toLowerCase() }
+        })
+        await post.addTag(tag)
       }
     }
 
-    res.redirect("/publicaciones");
+    res.redirect('/publicaciones')
+
   } catch (err) {
-    console.error(err);
-    res.redirect("/publicaciones");
+    console.error(err)
+    res.redirect('/publicaciones')
   }
-};
+}
+
 
 export const eliminar = async (req, res) => {
   try {
