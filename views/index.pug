@@ -5,13 +5,17 @@ block metadata
 
 block content
 
+  a.fixed.bottom-6.right-6.bg-indigo-600.text-white.w-14.h-14.rounded-full.flex.items-center.justify-center.text-3xl.shadow-lg(
+    href="/publicaciones/crear"
+    class="hover:bg-indigo-700 transition-colors"
+  ) +
   div.container.mx-auto.max-w-7xl.px-4.py-8
 
     if feed
 
       h1.text-white.text-4xl.font-bold.mb-2
         | Tu feed
-
+     
       if !siguePersonas
 
         div.bg-gray-800.rounded-xl.p-6.mb-8
@@ -26,7 +30,7 @@ block content
 
         p.text-gray-400.mb-8
           | Publicaciones de las personas que seguís.
-
+      
     else
 
       h1.text-white.text-4xl.font-bold.mb-2
@@ -37,34 +41,68 @@ block content
 
     if posts.length > 0
 
-      div.grid.gap-6(
-        class="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-      )
+      div.max-w-3xl.mx-auto.space-y-8
 
         each post in posts
 
-          a.block.bg-gray-800.rounded-xl.overflow-hidden.no-underline(
-            href=`/publicaciones/${post.idPost}`
+          div.bg-gray-800.rounded-xl.overflow-hidden.shadow-lg.transition-all.duration-200(
+            class='hover:ring-2 hover:ring-indigo-500'
           )
 
-            if post.portada
+            div.p-4.flex.items-center.justify-between.border-b.border-gray-700
 
-              img.w-full.h-72.object-cover(
-                src=post.portada
-              )
+              a.text-indigo-400.font-medium.no-underline(href=`/perfil/${post.Author.idUser}` class="hover:text-indigo-300")
+                =  post.Author.userName
 
-            div.p-4
+              span.text-gray-500.text-sm
+                = new Date(post.createdAt).toLocaleDateString()
 
-              h2.text-white.text-xl.font-bold.mb-2
-                = post.title
+            a.block.no-underline(
+              href=`/publicaciones/${post.idPost}`
+            )
 
-              if post.description
+              if post.portada
 
-                p.text-gray-400.text-sm.mb-3
-                  = post.description
+                img.w-full.object-contain.bg-gray-900(
+                  style="max-height:700px"
+                  src=post.portada
+                  alt=post.title
+                )
 
-              p.text-indigo-400.font-medium
-                = post.Author.userName
+              div.p-4
+
+                h2.text-white.text-2xl.font-bold.mb-3
+                  = post.title
+
+                if post.description
+
+                  p.text-gray-400.mb-4
+                    = post.description
+
+                div.flex.items-center.gap-6.text-sm.mb-4
+
+                  if post.promedioRating
+
+                    span.text-yellow-400
+                      | ★ #{post.promedioRating}/5
+
+                  else
+
+                    span.text-gray-500
+                      | ★ Sin valoraciones
+
+                  
+
+                if post.Tags && post.Tags.length > 0
+
+                  div.flex.flex-wrap.gap-2.mb-4
+
+                    each tag in post.Tags.slice(0, 5)
+
+                      span.bg-gray-700.text-indigo-400.text-xs.px-2.py-1.rounded-full
+                        | ##{tag.nameTag}
+
+
 
     else
 

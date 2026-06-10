@@ -19,22 +19,7 @@ block content
         div
           label.text-gray-400.block.mb-1 Descripción
           textarea.w-full.rounded.bg-gray-700.text-white.px-3.py-2(
-            name='descripcion' rows='4')= post.description
-
-                div
-          label.text-gray-400.block.mb-1 Imágenes actuales
-          div.flex.gap-2.flex-wrap.mb-2
-            if post.Photos && post.Photos.length
-              each foto in post.Photos
-                if foto.imageSrc
-                  img(src=foto.imageSrc style='width:80px; height:80px; object-fit:cover; border-radius:8px;')
-            else
-              span.text-gray-400 No hay imágenes actuales
-
-          label.text-gray-400.block.mb-1 Reemplazar imágenes (opcional)
-          input#imagenes(type='file' multiple accept='image/*')
-          div#preview.flex.gap-2.mt-2.flex-wrap
-          div#imagenesContainer
+            name='descripcion' rows='4') #{post.description}
 
         div
           label.text-gray-400.block.mb-1 Etiquetas

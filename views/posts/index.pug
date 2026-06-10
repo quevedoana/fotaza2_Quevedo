@@ -4,65 +4,127 @@ block metadata
   title Publicaciones
 
 block content
+
   div.container.mx-auto.px-4.py-8
+
     div.flex.justify-between.items-center.mb-8
-      h1.text-white.text-2xl.font-bold Explorar Publicaciones
-      a.bg-indigo-600.text-gray-200.rounded-lg.px-4.py-2(href='/publicaciones/crear',class='hover:bg-indigo-700 transition-colors') + Nueva Publicación
+
+      h1.text-white.text-3xl.font-bold
+        | Explorar publicaciones
+
+      a.bg-indigo-600.text-gray-200.rounded-lg.px-4.py-2(
+        href='/publicaciones/crear'
+        class='hover:bg-indigo-700 transition-colors'
+      )
+        | + Nueva Publicación
 
     if posts && posts.length > 0
-      div(class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6')
+
+      div.max-w-3xl.mx-auto.space-y-8
+
         each post in posts
-          div.bg-gray-800.rounded-lg.overflow-hidden(class='hover:ring-2 hover:ring-indigo-500 transition-all')
-            a(href=`/publicaciones/${post.idPost}`)
+
+          div.bg-gray-800.rounded-xl.overflow-hidden.shadow-lg.transition-all(
+            class='hover:ring-2 hover:ring-indigo-500'
+          )
+
+            div.p-4.flex.items-center.justify-between.border-b.border-gray-700
+
+              a.text-indigo-400.font-medium.no-underline(
+                href=`/perfil/${post.Author.idUser}`
+                class='hover:text-indigo-300'
+              )
+                = post.Author.userName
+
+              span.text-gray-500.text-sm
+                = new Date(post.createdAt).toLocaleDateString()
+
+            a.block(
+              href=`/publicaciones/${post.idPost}`
+            )
+
               if post.Photos && post.Photos.length > 0
-                img.w-full.h-56.object-cover(src=post.Photos[0].imageSrc alt=post.title)
+
+                img.w-full.object-contain.bg-gray-900(
+                  style="max-height:700px"
+                  src=post.Photos[0].imageSrc
+                  alt=post.title
+                )
+
               else
+
                 div.w-full.h-56.bg-gray-700.flex.items-center.justify-center.text-gray-500
                   | Sin imagen
 
-            div.p-4
-              a(href=`/publicaciones/${post.idPost}`)
-                h2.text-white.font-semibold.text-lg.mb-2(class='hover:text-indigo-400 transition-colors')= post.title
-                p.text-gray-500.text-xs.mb-2
-                  | Por #{post.Author.userName}
-                div.flex.gap-4.text-sm.mb-3
+            div.p-5
 
-                  if post.promedioRating
+              h2.text-white.text-2xl.font-bold.mb-3
+                = post.title
 
-                    span.text-yellow-400
-                      | Valoraciones: #{post.promedioRating}
-
-                  else
-
-                    span.text-gray-500
-                      | Valoraciones: Sin valoraciones
-
-                  
               if post.description
-                p.text-gray-400.text-sm.mb-3= post.description
-              
-              if post.Tags && post.Tags.length > 0
-                div.flex.flex-wrap.gap-1.mb-3
-                  each tag in post.Tags.slice(0, 3)
-                    span.bg-gray-700.text-indigo-400.text-xs.px-2.py-1.rounded-full ##{tag.nameTag}
-              
-              div.flex.gap-2.mt-2
 
-                a.flex-1.text-center.bg-indigo-600.text-gray-200.rounded.py-1.text-sm(href=`/publicaciones/${post.idPost}`) Ver más
+                p.text-gray-400.mb-4
+                  = post.description
+
+              div.flex.items-center.gap-6.text-sm.mb-4
+
+                if post.promedioRating
+
+                  span.text-yellow-400
+                    | ★ #{post.promedioRating}/5
+
+                else
+
+                  span.text-gray-500
+                    | ★ Sin valoraciones
+
+
+              if post.Tags && post.Tags.length > 0
+
+                div.flex.flex-wrap.gap-2.mb-4
+
+                  each tag in post.Tags.slice(0, 5)
+
+                    span.bg-gray-700.text-indigo-400.text-xs.px-2.py-1.rounded-full
+                      | ##{tag.nameTag}
+
+              div.flex.gap-2.mt-4
+
+                a.flex-1.text-center.bg-indigo-600.text-gray-200.rounded-lg.py-2.text-sm(
+                  href=`/publicaciones/${post.idPost}`
+                  class='hover:bg-indigo-700 transition-colors'
+                )
+                  | Ver publicación
 
                 if currentUser && currentUser.idUser === post.idUser
 
-                  a.flex-1.text-center.bg-sky-600.text-gray-200.rounded.py-1.text-sm(href=`/publicaciones/${post.idPost}/editar`) Editar
+                  a.flex-1.text-center.bg-sky-600.text-gray-200.rounded-lg.py-2.text-sm(
+                    href=`/publicaciones/${post.idPost}/editar`
+                    class='hover:bg-sky-700 transition-colors'
+                  )
+                    | Editar
 
-                  form.flex-1(action=`/publicaciones/${post.idPost}/eliminar` method='POST' onsubmit="return confirm('¿Seguro que querés eliminar esta publicación?')")
+                  form.flex-1(
+                    action=`/publicaciones/${post.idPost}/eliminar`
+                    method='POST'
+                    onsubmit="return confirm('¿Seguro que querés eliminar esta publicación?')"
+                  )
 
-                    button.w-full.bg-rose-600.text-gray-200.rounded.py-1.text-sm(type='submit') Eliminar
+                    button.w-full.bg-rose-600.text-gray-200.rounded-lg.py-2.text-sm(
+                      type='submit'
+                      class='hover:bg-rose-700 transition-colors'
+                    )
+                      | Eliminar
 
     else
-      div.bg-gray-800.rounded-lg.p-12.text-center
-        div.text-6xl.mb-4 
-        p.text-gray-400.text-lg.mb-4 Aún no hay publicaciones
+
+      div.bg-gray-800.rounded-xl.p-12.text-center
+
+        p.text-gray-400.text-lg.mb-4
+          | Aún no hay publicaciones
+
         a.bg-indigo-600.text-gray-200.rounded-lg.px-6.py-3.inline-block(
-          href='/publicaciones/crear',
+          href='/publicaciones/crear'
           class='hover:bg-indigo-700 transition-colors'
-        )  Crear primera publicación
+        )
+          | Crear primera publicación
