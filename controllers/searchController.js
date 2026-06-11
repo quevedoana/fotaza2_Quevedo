@@ -52,7 +52,7 @@ export const buscar = async (req, res) => {
                 },
               }
             : undefined,
-          required: false,
+          required: !!autor,
         },
 
         {
