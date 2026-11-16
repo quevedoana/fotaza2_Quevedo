@@ -1,11 +1,12 @@
-extends ../layout
 
-block metadata
-  title Detalles de la Publicación
+extends ../layout
 
 block content
   div.container.mx-auto.px-4.py-8
-    a.text-indigo-400.mb-4.inline-block(href='/publicaciones', class='hover:text-indigo-300')
+    a.text-indigo-400.mb-4.inline-block(
+      href='/publicaciones'
+      class='hover:text-indigo-300'
+    )
       | &larr; Volver a todas las publicaciones
 
     if post
@@ -14,13 +15,12 @@ block content
         if post.Photos && post.Photos.length > 0
           div.p-4
             div.relative.flex.items-center.justify-center
-
               button#prev.absolute.left-2.bg-gray-700.text-white.rounded-full.w-10.h-10.flex.items-center.justify-center(
                 class='hover:bg-gray-600'
               ) &#8592;
 
               img#fotoActual.max-w-lg.mx-auto.block.rounded-lg.h-80.object-cover(
-                src=fotoActual.imageSrc
+                src=post.Photos[0].imageSrc
                 alt=post.title
               )
 
@@ -29,145 +29,264 @@ block content
               ) &#8594;
 
             p.text-center.text-gray-500.text-sm.mt-2
-              span#indice #{fotoIndex + 1}
+              span#indice 1
               |  / #{post.Photos.length}
 
         div.p-6
-
           h1.text-white.text-2xl.font-bold.mb-4= post.title
 
-          p.text-gray-500.mb-4
-
-            | Publicado por
-
-          a.text-indigo-400.ml-1(
-            href=`/perfil/${post.Author.idUser}`
-            class='hover:text-indigo-300'
-          ) 
-            = post.Author.userName
-
-          div.flex.items-center.gap-2.mb-4
-
-            span.text-yellow-400.text-xl ★
-
-            span.text-gray-300= `${promedio} / 5`
-
-            span.text-gray-500.text-sm (#{fotoActual.Ratings.length} votos)
-          if currentUser && currentUser.idUser !== post.idUser
-
-            form(action=`/publicaciones/${post.idPost}/fotos/${fotoActual.idPhoto}/rating` method='POST')
-
-              div.flex.gap-2.mb-4
-
-                each n in [1,2,3,4,5]
-
-                  button.text-2xl.text-yellow-600.transition(class="hover:text-yellow-100" type='submit' name='score' value=n) ★
           if post.description
             p.text-gray-400.mb-4= post.description
 
           if post.Tags && post.Tags.length > 0
             div.flex.flex-wrap.gap-2.mb-4
-
               each tag in post.Tags
+                span.bg-gray-700.text-indigo-400.text-sm.px-3.py-1.rounded-full
+                  | ##{tag.nameTag}
 
-                span.bg-gray-700.text-indigo-400.text-sm.px-3.py-1.rounded-full ##{tag.nameTag}
+          //- VALORACIONES
+          if post.Photos && post.Photos.length > 0
+            - const ratings = post.Photos[0].Ratings || []
+            - const cantidadVotos = ratings.length
+            - const promedio = cantidadVotos > 0 ? ratings.reduce((total, rating) => total + Number(rating.score), 0) / cantidadVotos : 0
+            - const miValoracion = currentUser ? ratings.find(rating => Number(rating.idUser) === Number(currentUser.idUser)) : null
+            - const puntuacionActual = miValoracion ? Number(miValoracion.score) : 0
 
-          div.mt-6
+            div.mt-6.p-4.bg-gray-700.rounded-lg
+              h3.text-white.text-lg.font-semibold.mb-2 Valoración
 
-            h3.text-white.text-lg.font-semibold.mb-3 Comentarios
+              if cantidadVotos > 0
+                p.text-yellow-400.text-lg
+                  | ★ #{promedio.toFixed(1)} / 5
 
-            if fotoActual.commentsActive
+                p.text-gray-400.text-sm
+                  | #{cantidadVotos} valoración(es)
+              else
+                p.text-gray-400.text-sm
+                  | Esta imagen todavía no tiene valoraciones.
 
-              form(action=`/publicaciones/${post.idPost}/fotos/${fotoActual.idPhoto}/comentarios` method='POST')
+              if currentUser
+                if Number(currentUser.idUser) !== Number(post.idUser)
+                  form(
+                    id='formValoracion'
+                    action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/rating`
+                    method='POST'
+                  )
+                    p.text-gray-300.text-sm.mb-2
+                      if miValoracion
+                        | Tu valoración:
+                      else
+                        | Tocá las estrellas para valorar:
 
-                div.flex.gap-2
+                    div.flex.gap-2.items-center(
+                      id='estrellas'
+                      data-puntuacion=puntuacionActual
+                    )
+                      each numero in [1, 2, 3, 4, 5]
+                        button.text-3xl.transition-colors(
+                          type='button'
+                          data-valor=numero
+                          aria-label=`Valorar con ${numero} estrellas`
+                          class=puntuacionActual >= numero ? 'text-yellow-400' : 'text-gray-500'
+                        ) ★
 
-                  input.flex-1.rounded.bg-gray-700.text-white.px-3.py-2(type='text' name='description' placeholder='Escribí un comentario...' required)
+                    input#score(type='hidden' name='score' value=puntuacionActual)
 
-                  button.bg-indigo-600.text-white.rounded.px-4.py-2(class="hover:bg-indigo-700" type='submit') Comentar
+                else
+                  p.text-gray-400.text-sm.mt-3
+                    | No podés valorar tu propia publicación.
+              else
+                p.text-gray-400.text-sm.mt-3
+                  | Para valorar esta imagen,
+                  a.text-indigo-400(
+                    href='/login'
+                    class='hover:text-indigo-300'
+                  ) iniciá sesión.
 
-              if currentUser && currentUser.idUser === post.idUser
+          //- COMENTARIOS
+          if post.Photos && post.Photos.length > 0
+            div.mt-6
+              h3.text-white.text-lg.font-semibold.mb-3
+                | Comentarios
 
-                form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${fotoActual.idPhoto}/comentarios/cerrar` method='POST')
+              if post.Photos[0].commentsActive
+                if currentUser
+                  form(
+                    action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios`
+                    method='POST'
+                  )
+                    div.flex.gap-2
+                      input.flex-1.rounded.bg-gray-700.text-white.px-3.py-2(
+                        type='text'
+                        name='description'
+                        placeholder='Escribí un comentario...'
+                        required
+                      )
 
+                      button.bg-indigo-600.text-white.rounded.px-4.py-2(
+                        type='submit'
+                      )
+                        | Comentar
+                else
+                  p.text-gray-500.text-sm
+                    | Para comentar,
+                    a.text-indigo-400(
+                      href='/login'
+                      class='hover:text-indigo-300'
+                    ) iniciá sesión.
 
-                  button.text-rose-400.text-sm(class="hover:text-rose-300" type='submit') Cerrar comentarios
+                //- Solo el autor puede cerrar los comentarios
+                if currentUser && Number(currentUser.idUser) === Number(post.idUser)
+                  form.mt-2(
+                    action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/cerrar`
+                    method='POST'
+                  )
+                    button.text-red-400.text-sm(type='submit')
+                      | Cerrar comentarios
 
-            else
+              else
+                p.text-gray-500.text-sm
+                  | Comentarios cerrados
 
-              p.text-gray-500.text-sm Comentarios cerrados
+                //- Solo el autor puede abrirlos nuevamente
+                if currentUser && Number(currentUser.idUser) === Number(post.idUser)
+                  form.mt-2(
+                    action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/abrir`
+                    method='POST'
+                  )
+                    button.text-indigo-400.text-sm(type='submit')
+                      | Abrir comentarios
 
-              if currentUser && currentUser.idUser === post.idUser
+              //- Comentarios visibles para todos
+              div.mt-4.space-y-2
+                if post.Photos[0].Comments && post.Photos[0].Comments.length > 0
+                  each comment in post.Photos[0].Comments
+                    div.bg-gray-700.rounded.px-3.py-3
+                      div.flex.items-center.justify-between.mb-2
+                        if comment.Author
+                          a.text-indigo-400.font-semibold.text-sm(
+                            href=`/perfil/${comment.Author.idUser}`
+                            class='hover:text-indigo-300'
+                          )
+                            | @#{comment.Author.userName}
+                        else
+                          span.text-gray-400.text-sm
+                            | Usuario desconocido
 
-                form.mt-2(action=`/publicaciones/${post.idPost}/fotos/${fotoActual.idPhoto}/comentarios/abrir` method='POST')
+                        span.text-gray-500.text-xs
+                          = new Date(comment.createdAt).toLocaleDateString()
 
+                      p.text-white.text-sm
+                        = comment.description
+                else
+                  p.text-gray-500.text-sm
+                    | Todavía no hay comentarios.
 
-                  button.text-green-400.text-sm(class="hover:text-green-300" type='submit') Abrir comentarios
+          p.text-gray-500.text-sm.mt-4
+            | Publicado el: #{new Date(post.createdAt).toLocaleDateString()}
 
-            div.mt-4.space-y-3
+          //- EDITAR Y ELIMINAR: solamente el autor
+          if currentUser && Number(currentUser.idUser) === Number(post.idUser)
+            div.flex.gap-3.mt-6
+              a.bg-indigo-600.text-gray-200.rounded.px-4.py-2(
+                href=`/publicaciones/${post.idPost}/editar`
+                class='hover:bg-indigo-700 transition-colors'
+              )
+                | Editar
 
-              each comment in fotoActual.Comments
-
-                div.bg-gray-700.border.border-gray-600.rounded-lg.p-3(class="hover:border-indigo-500.transition")
-
-                  div.flex.items-center.justify-between.mb-2
-
-                    div.flex.items-center.gap-3
-
-                      div.w-8.h-8.rounded-full.bg-indigo-600.flex.items-center.justify-center.text-white.font-semibold
-
-                      div
-
-                        p.text-indigo-400.font-semibold.text-sm= comment.Author.userName
-
-                        p.text-gray-500.text-xs= new Date(comment.createdAt).toLocaleString('es-AR')
-
-                  p.text-gray-100.text-sm.leading-relaxed= comment.description
-
-          p.text-gray-500.text-sm.mt-6 Publicado el: #{new Date(post.createdAt).toLocaleDateString()}
-
-            if currentUser && currentUser.idUser === post.idUser
-
-              div.flex.gap-3.mt-6
-
-                a.bg-indigo-600.text-gray-200.rounded.px-4.py-2(class="hover:bg-indigo-700" href=`/publicaciones/${post.idPost}/editar`) Editar
-
-                form(action=`/publicaciones/${post.idPost}/eliminar` method='POST')
-
-                  button.bg-rose-600.text-gray-200.rounded.px-4.py-2(class="hover:bg-rose-700" type='submit') Eliminar
+              form(
+                action=`/publicaciones/${post.idPost}/eliminar`
+                method='POST'
+                onsubmit='return confirm("¿Eliminar esta publicación?")'
+              )
+                button.bg-red-600.text-gray-200.rounded.px-4.py-2(
+                  type='submit'
+                  class='hover:bg-red-700 transition-colors'
+                )
+                  | Eliminar
 
     else
-      div.bg-rose-900.text-rose-200.p-4.rounded
-        p Publicación no encontrada
+      div.bg-red-900.text-red-200.p-4.rounded
+        p
+          | Publicación no encontrada
 
     script.
       var fotos = !{fotos};
-      var actual = #{fotoIndex};
+      var actual = 0;
 
       function anterior() {
-        actual--;
-        if (actual < 0) {
-          actual = fotos.length - 1;
-        }
+        actual = actual - 1;
+        actual = actual < 0 ? fotos.length - 1 : actual;
 
-        window.location.href ='/publicaciones/#{post.idPost}?foto=' + actual;
+        document.getElementById('fotoActual').src = fotos[actual];
+        document.getElementById('indice').innerHTML = actual + 1;
       }
 
       function siguiente() {
-        actual++;
-        if (actual >= fotos.length) {
-          actual = 0;
-        }
+        actual = actual + 1;
+        actual = actual >= fotos.length ? 0 : actual;
 
-        window.location.href ='/publicaciones/#{post.idPost}?foto=' + actual;
-        }
+        document.getElementById('fotoActual').src = fotos[actual];
+        document.getElementById('indice').innerHTML = actual + 1;
+      }
 
       var prevBtn = document.getElementById('prev');
       var nextBtn = document.getElementById('next');
 
-      prevBtn.onclick = anterior;
-      nextBtn.onclick = siguiente;
+      if (fotos && fotos.length > 1 && prevBtn && nextBtn) {
+        prevBtn.onclick = anterior;
+        nextBtn.onclick = siguiente;
+      } else {
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+      }
 
-      var mostrarFlechas = fotos.length > 1;
-      prevBtn.style.display = mostrarFlechas ? 'flex' : 'none';
-      nextBtn.style.display = mostrarFlechas ? 'flex' : 'none';
+      //- VALORACION AUTOMATICA CON ESTRELLAS
+      var contenedorEstrellas = document.getElementById('estrellas');
+
+      if (contenedorEstrellas) {
+        var estrellas = contenedorEstrellas.querySelectorAll('button[data-valor]');
+        var inputScore = document.getElementById('score');
+        var formValoracion = document.getElementById('formValoracion');
+
+        var puntuacion = Number(contenedorEstrellas.dataset.puntuacion) || 0;
+        var enviando = false;
+
+        function pintarEstrellas(valor) {
+          estrellas.forEach(function(estrella) {
+            var numero = Number(estrella.dataset.valor);
+
+            if (numero <= valor) {
+              estrella.classList.add('text-yellow-400');
+              estrella.classList.remove('text-gray-500');
+            } else {
+              estrella.classList.remove('text-yellow-400');
+              estrella.classList.add('text-gray-500');
+            }
+          });
+        }
+
+        estrellas.forEach(function(estrella) {
+          estrella.addEventListener('click', function() {
+            if (enviando) return;
+
+            puntuacion = Number(this.dataset.valor);
+            inputScore.value = puntuacion;
+            enviando = true;
+
+            pintarEstrellas(puntuacion);
+
+            formValoracion.submit();
+          });
+
+          estrella.addEventListener('mouseenter', function() {
+            pintarEstrellas(Number(this.dataset.valor));
+          });
+
+          estrella.addEventListener('mouseleave', function() {
+            pintarEstrellas(puntuacion);
+          });
+        });
+
+        pintarEstrellas(puntuacion);
+      }

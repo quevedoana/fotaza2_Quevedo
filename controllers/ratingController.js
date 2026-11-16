@@ -1,10 +1,28 @@
+
 import { Rating, Photo, Post } from "../models/index.js";
 
 export const valorar = async (req, res) => {
-  try {
-    const { idPost, idPhoto } = req.params;
-    const { score } = req.body;
+  const { idPost, idPhoto } = req.params;
 
+  try {
+    // Verificar que haya un usuario autenticado
+    if (!req.session.user) {
+      return res.redirect("/login");
+    }
+
+    const idUser = req.session.user.idUser;
+    const score = Number(req.body.score);
+
+    // Validar que la puntuación sea un entero entre 1 y 5
+    if (
+      !Number.isInteger(score) ||
+      score < 1 ||
+      score > 5
+    ) {
+      return res.redirect(`/publicaciones/${idPost}`);
+    }
+
+    // Buscar la foto y su publicación
     const foto = await Photo.findByPk(idPhoto, {
       include: [
         {
@@ -14,37 +32,39 @@ export const valorar = async (req, res) => {
       ],
     });
 
-    if (!foto) {
+    if (!foto || !foto.Post) {
       return res.redirect(`/publicaciones/${idPost}`);
     }
 
     // No permitir valorar publicaciones propias
-    if (foto.Post.idUser === req.session.user.idUser) {
+    if (Number(foto.Post.idUser) === Number(idUser)) {
       return res.redirect(`/publicaciones/${idPost}`);
     }
 
+    // Buscar si el usuario ya valoró esta foto
     const ratingExistente = await Rating.findOne({
       where: {
         idPhoto,
-        idUser: req.session.user.idUser,
+        idUser,
       },
     });
 
     if (ratingExistente) {
-      await ratingExistente.update({
-        score,
-      });
+      // Actualizar la valoración existente
+      await ratingExistente.update({ score });
     } else {
+      // Crear una nueva valoración
       await Rating.create({
         idPhoto,
-        idUser: req.session.user.idUser,
+        idUser,
         score,
       });
     }
 
-    res.redirect(`/publicaciones/${idPost}`);
+    return res.redirect(`/publicaciones/${idPost}`);
+
   } catch (err) {
-    console.error(err);
-    res.redirect(`/publicaciones/${req.params.idPost}`);
+    console.error("Error al valorar la foto:", err);
+    return res.redirect(`/publicaciones/${idPost}`);
   }
 };

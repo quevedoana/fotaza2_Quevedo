@@ -1,17 +1,21 @@
+
 import { Post, Photo, Tag, Comment, User, Rating } from "../models/index.js";
 
+// Mostrar formulario de creación
 export const getCrear = (req, res) => {
   res.render("posts/create");
 };
 
+// Crear publicación
 export const postCrear = async (req, res) => {
   const { titulo, descripcion, etiquetas, imagenesBase64 } = req.body;
 
-  if (!imagenesBase64) {
+  if (!imagenesBase64 || (Array.isArray(imagenesBase64) && imagenesBase64.length === 0)) {
     return res.render("posts/create", {
       error: "Debés subir al menos una imagen",
     });
   }
+
   if (!titulo?.trim()) {
     return res.render("posts/create", {
       error: "El título es obligatorio",
@@ -20,51 +24,52 @@ export const postCrear = async (req, res) => {
 
   try {
     const post = await Post.create({
-      title: titulo,
+      title: titulo.trim(),
       description: descripcion,
       idUser: req.session.user.idUser,
     });
 
-    if (imagenesBase64) {
-      const imagenes = Array.isArray(imagenesBase64)
-        ? imagenesBase64
-        : [imagenesBase64];
+    const imagenes = Array.isArray(imagenesBase64)
+      ? imagenesBase64
+      : [imagenesBase64];
 
-      for (const base64 of imagenes) {
-        const base64Data = base64.split(",")[1] || base64;
-        const imageBuffer = Buffer.from(base64Data, "base64");
+    for (const base64 of imagenes) {
+      const base64Data = base64.split(",")[1] || base64;
+      const imageBuffer = Buffer.from(base64Data, "base64");
 
-        await Photo.create({
-          idPost: post.idPost,
-          photo: imageBuffer,
-          copyright: false,
-          commentsActive: true,
-        });
-      }
+      await Photo.create({
+        idPost: post.idPost,
+        photo: imageBuffer,
+        copyright: false,
+        commentsActive: true,
+      });
     }
 
     if (etiquetas) {
       const tags = etiquetas
         .split(",")
-        .map((t) => t.trim())
+        .map((t) => t.trim().toLowerCase())
         .filter((t) => t);
+
       for (const tagName of tags) {
         const [tag] = await Tag.findOrCreate({
-          where: { nameTag: tagName.toLowerCase() },
+          where: { nameTag: tagName },
         });
+
         await post.addTag(tag);
       }
     }
 
     res.redirect("/publicaciones");
   } catch (err) {
-    console.error(err);
+    console.error("Error al crear publicación:", err);
     res.redirect("/publicaciones/crear");
   }
 };
+
+// Mostrar una publicación
 export const show = async (req, res) => {
   const { id } = req.params;
-  const fotoIndex = Number(req.query.foto || 0);
 
   try {
     const post = await Post.findByPk(id, {
@@ -80,6 +85,7 @@ export const show = async (req, res) => {
                 {
                   model: User,
                   as: "Author",
+                  attributes: ["idUser", "userName"],
                 },
               ],
             },
@@ -89,8 +95,10 @@ export const show = async (req, res) => {
             },
           ],
         },
-        { model: Tag, as: "Tags" },
-        { model: User, as: "Author" },
+        {
+          model: Tag,
+          as: "Tags",
+        },
       ],
     });
 
@@ -103,6 +111,7 @@ export const show = async (req, res) => {
 
     const postData = post.toJSON();
 
+    // Convertimos las imágenes a Base64 para mostrarlas
     postData.Photos = postData.Photos.map((photo) => ({
       ...photo,
       imageSrc: photo.photo
@@ -110,35 +119,22 @@ export const show = async (req, res) => {
         : null,
     }));
 
-    const fotos = postData.Photos.map((p) => p.imageSrc).filter(
-      (f) => f !== null,
-    );
-
-    const fotoActual = postData.Photos[fotoIndex] || postData.Photos[0];
-
-    const ratings = fotoActual.Ratings || [];
-
-    const promedio =
-      ratings.length > 0
-        ? (
-            ratings.reduce((sum, r) => sum + Number(r.score), 0) /
-            ratings.length
-          ).toFixed(1)
-        : "0.0";
+    // Preparamos las imágenes para el carrusel
+    const fotos = postData.Photos
+      .map((photo) => photo.imageSrc)
+      .filter((foto) => foto !== null);
 
     res.render("posts/show", {
       post: postData,
       fotos: JSON.stringify(fotos),
-      fotoActual,
-      fotoIndex,
-      promedio,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error al mostrar publicación:", err);
     res.status(500).send("Error del servidor: " + err.message);
   }
 };
 
+// Listar publicaciones
 export const index = async (req, res) => {
   try {
     const posts = await Post.findAll({
@@ -191,7 +187,7 @@ export const index = async (req, res) => {
 
       data.cantidadValoraciones = totalRatings;
 
-      // Convertimos las imágenes a Base64 para mostrarlas
+      // Convertimos las imágenes a Base64
       data.Photos = data.Photos.map((photo) => ({
         ...photo,
         imageSrc: photo.photo
@@ -206,7 +202,6 @@ export const index = async (req, res) => {
       title: "Publicaciones",
       posts: postsConImagenes,
     });
-
   } catch (err) {
     console.error("Error al cargar las publicaciones:", err);
 
@@ -217,6 +212,7 @@ export const index = async (req, res) => {
   }
 };
 
+// Mostrar formulario de edición
 export const getEditar = async (req, res) => {
   try {
     const post = await Post.findOne({
@@ -231,15 +227,15 @@ export const getEditar = async (req, res) => {
       return res.redirect("/publicaciones");
     }
 
-    if (post.idUser !== req.session.user.idUser) {
+    if (Number(post.idUser) !== Number(req.session.user.idUser)) {
       return res.status(403).send("No autorizado");
     }
 
     const postData = post.toJSON();
 
     postData.description = postData.description
-  ? postData.description.replaceAll("<div></div>", "")
-  : "";
+      ? postData.description.replace(/<div><\/div>/g, "")
+      : "";
 
     postData.Photos = postData.Photos.map((photo) => ({
       ...photo,
@@ -248,7 +244,9 @@ export const getEditar = async (req, res) => {
         : null,
     }));
 
-    const tagsString = postData.Tags.map((t) => t.nameTag).join(", ");
+    const tagsString = postData.Tags
+      .map((tag) => tag.nameTag)
+      .join(", ");
 
     res.render("posts/edit", {
       title: "Editar Publicación",
@@ -256,52 +254,62 @@ export const getEditar = async (req, res) => {
       tagsString,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error al cargar formulario de edición:", err);
     res.redirect("/publicaciones");
   }
 };
 
+// Procesar edición
 export const postEditar = async (req, res) => {
-  const { titulo, descripcion, etiquetas } = req.body
+  const { titulo, descripcion, etiquetas } = req.body;
 
   const descripcionLimpia = descripcion
-    ? descripcion.replace(/<[^>]*>/g, '').trim()
-    : null
+    ? descripcion.replace(/<[^>]*>/g, "").trim()
+    : null;
 
   try {
-    const post = await Post.findOne({ where: { idPost: req.params.id } })
-    if (!post) return res.redirect('/publicaciones')
+    const post = await Post.findOne({
+      where: { idPost: req.params.id },
+    });
 
-    if (post.idUser !== req.session.user.idUser) {
-      return res.status(403).send('No autorizado')
+    if (!post) {
+      return res.redirect("/publicaciones");
+    }
+
+    if (Number(post.idUser) !== Number(req.session.user.idUser)) {
+      return res.status(403).send("No autorizado");
     }
 
     await post.update({
       title: titulo,
       description: descripcionLimpia,
-    })
+    });
 
-    if (etiquetas) {
-      await post.setTags([])
+    if (etiquetas !== undefined) {
+      await post.setTags([]);
 
-      const tags = etiquetas.split(',').map(t => t.trim()).filter(t => t)
+      const tags = etiquetas
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase())
+        .filter((tag) => tag);
+
       for (const tagName of tags) {
         const [tag] = await Tag.findOrCreate({
-          where: { nameTag: tagName.toLowerCase() }
-        })
-        await post.addTag(tag)
+          where: { nameTag: tagName },
+        });
+
+        await post.addTag(tag);
       }
     }
 
-    res.redirect('/publicaciones')
-
+    res.redirect("/publicaciones");
   } catch (err) {
-    console.error(err)
-    res.redirect('/publicaciones')
+    console.error("Error al editar publicación:", err);
+    res.redirect("/publicaciones");
   }
-}
+};
 
-
+// Eliminar publicación
 export const eliminar = async (req, res) => {
   try {
     const post = await Post.findOne({
@@ -312,7 +320,7 @@ export const eliminar = async (req, res) => {
       return res.redirect("/publicaciones");
     }
 
-    if (post.idUser !== req.session.user.idUser) {
+    if (Number(post.idUser) !== Number(req.session.user.idUser)) {
       return res.status(403).send("No autorizado");
     }
 
@@ -326,7 +334,7 @@ export const eliminar = async (req, res) => {
 
     res.redirect("/publicaciones");
   } catch (err) {
-    console.error(err);
+    console.error("Error al eliminar publicación:", err);
     res.redirect("/publicaciones");
   }
 };
