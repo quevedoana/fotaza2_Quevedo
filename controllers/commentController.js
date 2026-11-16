@@ -1,25 +1,20 @@
 import { Comment, Photo, Post } from "../models/index.js";
 
+const buscarFoto = (idPhoto) =>
+  Photo.findByPk(idPhoto, { include: [{ model: Post, as: "Post" }] });
+
 export const agregar = async (req, res) => {
-  console.log("ENTRO A AGREGAR COMENTARIO");
   const { idPost, idPhoto } = req.params;
-  const { description } = req.body;
+  // la columna es STRING (255), por eso el slice
+  const description = req.body.description?.trim().slice(0, 255);
 
   try {
-    const foto = await Photo.findByPk(idPhoto);
-    console.log("ID PHOTO:", idPhoto)
-    console.log("FOTO:", foto)
+    const foto = await buscarFoto(idPhoto);
 
-    if (!foto) return res.redirect(`/publicaciones/${idPost}`);
-
-    if (!foto.commentsActive) {
+    if (!foto || !foto.commentsActive || !description) {
       return res.redirect(`/publicaciones/${idPost}`);
     }
-    console.log("SESSION:", req.session);
-    console.log("USER:", req.session.user);
-    if (!req.session.user) {
-      return res.redirect("/login");
-    }
+
     await Comment.create({
       description,
       idUser: req.session.user.idUser,
@@ -33,40 +28,24 @@ export const agregar = async (req, res) => {
   }
 };
 
-export const cerrar = async (req, res) => {
+// solo el autor de la publicación puede abrir o cerrar comentarios
+const cambiarEstado = (activo) => async (req, res) => {
   const { idPost, idPhoto } = req.params;
 
   try {
-    const foto = await Photo.findByPk(idPhoto);
-    if (!foto) return res.redirect(`/publicaciones/${idPost}`);
+    const foto = await buscarFoto(idPhoto);
 
-    await foto.update({ commentsActive: false });
+    if (!foto || foto.Post.idUser !== req.session.user.idUser) {
+      return res.status(403).send("No autorizado");
+    }
 
+    await foto.update({ commentsActive: activo });
     res.redirect(`/publicaciones/${idPost}`);
   } catch (err) {
     console.error(err);
     res.redirect(`/publicaciones/${idPost}`);
   }
 };
-export const abrir = async (req, res) => {
-  const { idPost, idPhoto } = req.params
 
-  try {
-
-    const foto = await Photo.findByPk(idPhoto)
-
-    if (!foto) {
-      return res.redirect(`/publicaciones/${idPost}`)
-    }
-
-    await foto.update({
-      commentsActive: true
-    })
-
-    res.redirect(`/publicaciones/${idPost}`)
-
-  } catch (err) {
-    console.error(err)
-    res.redirect(`/publicaciones/${idPost}`)
-  }
-}
+export const cerrar = cambiarEstado(false);
+export const abrir = cambiarEstado(true);

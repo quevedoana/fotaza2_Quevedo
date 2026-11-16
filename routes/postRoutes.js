@@ -17,4 +17,7 @@ router.post('/:idPost/fotos/:idPhoto/comentarios', commentController.agregar)
 router.post('/:idPost/fotos/:idPhoto/comentarios/cerrar', commentController.cerrar)
 router.post('/:idPost/fotos/:idPhoto/comentarios/abrir', commentController.abrir)
 router.post('/:idPost/fotos/:idPhoto/rating', authMiddleware,ratingController.valorar)
+router.post('/:idPost/fotos/:idPhoto/comentarios', authMiddleware, commentController.agregar)
+router.post('/:idPost/fotos/:idPhoto/comentarios/cerrar', authMiddleware, commentController.cerrar)
+router.post('/:idPost/fotos/:idPhoto/comentarios/abrir', authMiddleware, commentController.abrir)
 export default router

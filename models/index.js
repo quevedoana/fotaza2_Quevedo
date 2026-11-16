@@ -62,14 +62,11 @@ User.belongsToMany(User, {
 });
 
 export async function connectDatabase() {
-  try {
-    await sequelize.authenticate();
-    console.log("conexion a bd establecida");
-    await sequelize.sync();
-    console.log("sincronizando los modelos");
-  } catch (err) {
-    console.error("error en la conexion a la bd", err);
-  }
+  await sequelize.authenticate();
+  console.log("Conexión a la base de datos establecida");
+
+  await sequelize.sync();
+  console.log("Modelos sincronizados correctamente");
 }
 
 export {

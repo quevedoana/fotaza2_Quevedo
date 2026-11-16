@@ -148,10 +148,6 @@ export const index = async (req, res) => {
           as: "Photos",
           include: [
             {
-              model: Comment,
-              as: "Comments",
-            },
-            {
               model: Rating,
               as: "Ratings",
             },
@@ -172,34 +168,36 @@ export const index = async (req, res) => {
     const postsConImagenes = posts.map((post) => {
       const data = post.toJSON();
 
+      let totalRatings = 0;
+      let sumaRatings = 0;
+
+      // Recorremos todas las fotos de la publicación
+      data.Photos.forEach((photo) => {
+        const ratings = photo.Ratings || [];
+
+        totalRatings += ratings.length;
+
+        sumaRatings += ratings.reduce(
+          (sum, rating) => sum + Number(rating.score),
+          0
+        );
+      });
+
+      // Calculamos el promedio de todas las valoraciones
+      data.promedioRating =
+        totalRatings > 0
+          ? (sumaRatings / totalRatings).toFixed(1)
+          : null;
+
+      data.cantidadValoraciones = totalRatings;
+
+      // Convertimos las imágenes a Base64 para mostrarlas
       data.Photos = data.Photos.map((photo) => ({
         ...photo,
         imageSrc: photo.photo
           ? `data:image/jpeg;base64,${Buffer.from(photo.photo).toString("base64")}`
           : null,
       }));
-
-      let totalComentarios = 0;
-      let totalRatings = 0;
-      let sumaRatings = 0;
-
-      data.Photos.forEach((photo) => {
-        totalComentarios += photo.Comments?.length || 0;
-
-        if (photo.Ratings?.length) {
-          totalRatings += photo.Ratings.length;
-
-          sumaRatings += photo.Ratings.reduce(
-            (sum, r) => sum + Number(r.score),
-            0,
-          );
-        }
-      });
-
-      data.cantidadComentarios = totalComentarios;
-
-      data.promedioRating =
-        totalRatings > 0 ? (sumaRatings / totalRatings).toFixed(1) : null;
 
       return data;
     });
@@ -208,8 +206,9 @@ export const index = async (req, res) => {
       title: "Publicaciones",
       posts: postsConImagenes,
     });
+
   } catch (err) {
-    console.error(err);
+    console.error("Error al cargar las publicaciones:", err);
 
     res.render("posts/index", {
       title: "Publicaciones",

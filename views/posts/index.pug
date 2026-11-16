@@ -4,37 +4,37 @@ block metadata
   title Publicaciones
 
 block content
-
   div.container.mx-auto.px-4.py-8
 
     div.flex.justify-between.items-center.mb-8
-
       h1.text-white.text-3xl.font-bold
         | Explorar publicaciones
 
-      a.bg-indigo-600.text-gray-200.rounded-lg.px-4.py-2(
-        href='/publicaciones/crear'
-        class='hover:bg-indigo-700 transition-colors'
-      )
-        | + Nueva Publicación
+      if currentUser
+        a.bg-indigo-600.text-gray-200.rounded-lg.px-4.py-2(
+          href='/publicaciones/crear'
+          class='hover:bg-indigo-700 transition-colors'
+        )
+          | + Nueva Publicación
 
     if posts && posts.length > 0
-
       div.max-w-3xl.mx-auto.space-y-8
 
         each post in posts
-
           div.bg-gray-800.rounded-xl.overflow-hidden.shadow-lg.transition-all(
             class='hover:ring-2 hover:ring-indigo-500'
           )
 
             div.p-4.flex.items-center.justify-between.border-b.border-gray-700
-
-              a.text-indigo-400.font-medium.no-underline(
-                href=`/perfil/${post.Author.idUser}`
-                class='hover:text-indigo-300'
-              )
-                = post.Author.userName
+              if post.Author
+                a.text-indigo-400.font-medium.no-underline(
+                  href=`/perfil/${post.Author.idUser}`
+                  class='hover:text-indigo-300'
+                )
+                  = post.Author.userName
+              else
+                span.text-gray-500
+                  | Usuario desconocido
 
               span.text-gray-500.text-sm
                 = new Date(post.createdAt).toLocaleDateString()
@@ -42,54 +42,39 @@ block content
             a.block(
               href=`/publicaciones/${post.idPost}`
             )
-
               if post.Photos && post.Photos.length > 0
-
                 img.w-full.object-contain.bg-gray-900(
                   style="max-height:700px"
                   src=post.Photos[0].imageSrc
                   alt=post.title
                 )
-
               else
-
                 div.w-full.h-56.bg-gray-700.flex.items-center.justify-center.text-gray-500
                   | Sin imagen
 
             div.p-5
-
               h2.text-white.text-2xl.font-bold.mb-3
                 = post.title
 
               if post.description
-
                 p.text-gray-400.mb-4
                   = post.description
 
               div.flex.items-center.gap-6.text-sm.mb-4
-
                 if post.promedioRating
-
                   span.text-yellow-400
                     | ★ #{post.promedioRating}/5
-
                 else
-
                   span.text-gray-500
                     | ★ Sin valoraciones
 
-
               if post.Tags && post.Tags.length > 0
-
                 div.flex.flex-wrap.gap-2.mb-4
-
                   each tag in post.Tags.slice(0, 5)
-
                     span.bg-gray-700.text-indigo-400.text-xs.px-2.py-1.rounded-full
                       | ##{tag.nameTag}
 
               div.flex.gap-2.mt-4
-
                 a.flex-1.text-center.bg-indigo-600.text-gray-200.rounded-lg.py-2.text-sm(
                   href=`/publicaciones/${post.idPost}`
                   class='hover:bg-indigo-700 transition-colors'
@@ -97,7 +82,6 @@ block content
                   | Ver publicación
 
                 if currentUser && currentUser.idUser === post.idUser
-
                   a.flex-1.text-center.bg-sky-600.text-gray-200.rounded-lg.py-2.text-sm(
                     href=`/publicaciones/${post.idPost}/editar`
                     class='hover:bg-sky-700 transition-colors'
@@ -109,7 +93,6 @@ block content
                     method='POST'
                     onsubmit="return confirm('¿Seguro que querés eliminar esta publicación?')"
                   )
-
                     button.w-full.bg-rose-600.text-gray-200.rounded-lg.py-2.text-sm(
                       type='submit'
                       class='hover:bg-rose-700 transition-colors'
@@ -117,14 +100,19 @@ block content
                       | Eliminar
 
     else
-
       div.bg-gray-800.rounded-xl.p-12.text-center
-
         p.text-gray-400.text-lg.mb-4
           | Aún no hay publicaciones
 
-        a.bg-indigo-600.text-gray-200.rounded-lg.px-6.py-3.inline-block(
-          href='/publicaciones/crear'
-          class='hover:bg-indigo-700 transition-colors'
-        )
-          | Crear primera publicación
+        if currentUser
+          a.bg-indigo-600.text-gray-200.rounded-lg.px-6.py-3.inline-block(
+            href='/publicaciones/crear'
+            class='hover:bg-indigo-700 transition-colors'
+          )
+            | Crear primera publicación
+        else
+          a.bg-indigo-600.text-gray-200.rounded-lg.px-6.py-3.inline-block(
+            href='/login'
+            class='hover:bg-indigo-700 transition-colors'
+          )
+            | Iniciar sesión
