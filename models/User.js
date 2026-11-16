@@ -1,6 +1,6 @@
-import { Model, DataTypes } from "sequelize";
-import sequelize from "../db/config.js"
 
+import { Model, DataTypes } from "sequelize";
+import sequelize from "../db/config.js";
 
 class User extends Model {}
 
@@ -10,28 +10,28 @@ User.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
-      unique:true,
+      unique: true,
       autoIncrement: true,
     },
     userName: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true, 
+      unique: true,
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true, 
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false, 
+      allowNull: false,
     },
     profilePhoto: {
       type: DataTypes.BLOB,
     },
     description: {
-      type: DataTypes.STRING, 
+      type: DataTypes.STRING,
     },
     fullName: {
       type: DataTypes.STRING,
@@ -41,11 +41,25 @@ User.init(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    role: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "user",
+      validate: {
+        isIn: [["user", "moderator"]],
+      },
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   },
   {
-    sequelize, 
-    tableName: 'Users',
+    sequelize,
+    tableName: "Users",
     timestamps: true,
-  },
+  }
 );
+
 export default User;

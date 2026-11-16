@@ -1,3 +1,4 @@
+
 import bcrypt from "bcrypt";
 import { User } from "../models/index.js";
 
@@ -25,8 +26,11 @@ export const postRegister = async (req, res) => {
       });
     }
 
+    const emailLimpio = email.trim().toLowerCase();
+    const usuarioLimpio = usuario.trim();
+
     const existeEmail = await User.findOne({
-      where: { email },
+      where: { email: emailLimpio },
     });
 
     if (existeEmail) {
@@ -36,7 +40,7 @@ export const postRegister = async (req, res) => {
     }
 
     const existeUsuario = await User.findOne({
-      where: { userName: usuario },
+      where: { userName: usuarioLimpio },
     });
 
     if (existeUsuario) {
@@ -48,16 +52,18 @@ export const postRegister = async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
 
     await User.create({
-      email,
+      email: emailLimpio,
       password: hash,
       birthDate: fecha,
-      fullName: nombre,
-      userName: usuario,
+      fullName: nombre.trim(),
+      userName: usuarioLimpio,
+      role: "user",
+      active: true,
     });
 
     res.redirect("/login");
   } catch (err) {
-    console.error(err);
+    console.error("Error al registrarse:", err);
 
     return res.render("auth/register", {
       error: "Ocurrió un error al registrarse",
@@ -70,7 +76,9 @@ export const postLogin = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({
-      where: { email },
+      where: {
+        email: email?.trim().toLowerCase(),
+      },
     });
 
     if (!user) {
@@ -87,14 +95,21 @@ export const postLogin = async (req, res) => {
       });
     }
 
+    if (!user.active) {
+      return res.render("auth/login", {
+        error: "Tu cuenta se encuentra desactivada. Contactá con moderación.",
+      });
+    }
+
     req.session.user = {
       idUser: user.idUser,
       userName: user.userName,
+      role: user.role,
     };
 
     res.redirect("/");
   } catch (err) {
-    console.error(err);
+    console.error("Error al iniciar sesión:", err);
     res.redirect("/login");
   }
 };

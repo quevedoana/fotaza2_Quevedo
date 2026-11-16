@@ -1,3 +1,4 @@
+
 import sequelize from "../db/config.js";
 import User from "./User.js";
 import Post from "./Post.js";
@@ -8,18 +9,20 @@ import Interest from "./Interest.js";
 import Photo from "./Photo.js";
 import Rating from "./Rating.js";
 import Tag from "./Tag.js";
+import Report from "./Report.js";
 
-//un usuario tiene muchas publicaciones
+// Un usuario tiene muchas publicaciones
 User.hasMany(Post, { foreignKey: "idUser", as: "Posts" });
 Post.belongsTo(User, { foreignKey: "idUser", as: "Author" });
 
-//una publicación tiene muchas etiquetas y una etiqueta pertenece a muchas publicaciones
+// Una publicación tiene muchas etiquetas
 Post.belongsToMany(Tag, {
   through: "PostTags",
   foreignKey: "idPost",
   otherKey: "idTag",
   as: "Tags",
 });
+
 Tag.belongsToMany(Post, {
   through: "PostTags",
   foreignKey: "idTag",
@@ -27,38 +30,61 @@ Tag.belongsToMany(Post, {
   as: "Posts",
 });
 
-//una publicación tiene muchas fotos
+// Una publicación tiene muchas fotos
 Post.hasMany(Photo, { foreignKey: "idPost", as: "Photos" });
 Photo.belongsTo(Post, { foreignKey: "idPost", as: "Post" });
 
-//una foto tiene muchos comentarios
+// Una foto tiene muchos comentarios
 Photo.hasMany(Comment, { foreignKey: "idPhoto", as: "Comments" });
 Comment.belongsTo(Photo, { foreignKey: "idPhoto", as: "Photo" });
 
-//un usuario escribe muchos comentarios
+// Un usuario escribe muchos comentarios
 User.hasMany(Comment, { foreignKey: "idUser", as: "Comments" });
 Comment.belongsTo(User, { foreignKey: "idUser", as: "Author" });
 
-//una foto tiene muchas valoraciones
+// Una foto tiene muchas valoraciones
 Photo.hasMany(Rating, { foreignKey: "idPhoto", as: "Ratings" });
 Rating.belongsTo(Photo, { foreignKey: "idPhoto", as: "Photo" });
 
-//un usuario hace muchas valoraciones
+// Un usuario hace muchas valoraciones
 User.hasMany(Rating, { foreignKey: "idUser", as: "Ratings" });
 Rating.belongsTo(User, { foreignKey: "idUser", as: "User" });
 
-//un usuario puede seguir a muchos usuarios y ser seguido por muchos usuarios
+// Un usuario puede seguir a muchos usuarios y ser seguido por muchos usuarios
 User.belongsToMany(User, {
   through: Follower,
   as: "Following",
   foreignKey: "followerId",
   otherKey: "followeeId",
 });
+
 User.belongsToMany(User, {
   through: Follower,
   as: "Followers",
   foreignKey: "followeeId",
   otherKey: "followerId",
+});
+
+// Una publicación puede recibir muchas denuncias
+Post.hasMany(Report, {
+  foreignKey: "idPost",
+  as: "Reports",
+});
+
+Report.belongsTo(Post, {
+  foreignKey: "idPost",
+  as: "Post",
+});
+
+// Un usuario puede realizar muchas denuncias
+User.hasMany(Report, {
+  foreignKey: "idUser",
+  as: "Reports",
+});
+
+Report.belongsTo(User, {
+  foreignKey: "idUser",
+  as: "Reporter",
 });
 
 export async function connectDatabase() {
@@ -79,4 +105,5 @@ export {
   Photo,
   Rating,
   Tag,
+  Report,
 };
