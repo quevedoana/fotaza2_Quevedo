@@ -1,0 +1,92 @@
+
+extends ../layout
+
+block content
+  div.container.mx-auto.px-4.py-8
+    h1.text-white.text-3xl.font-bold.mb-2 Panel de moderación
+    p.text-gray-400.mb-8 Administración de denuncias de publicaciones
+
+    if reports && reports.length > 0
+      div.space-y-6
+        each report in reports
+          div.bg-gray-800.rounded-lg.p-6.shadow-lg
+            div.flex.flex-wrap.justify-between.items-center.gap-3.mb-4
+              h2.text-white.text-xl.font-semibold
+                | Denuncia ##{report.idReport}
+
+              if report.status === 'pending'
+                span.bg-yellow-600.text-white.text-xs.px-3.py-1.rounded-full Pendiente
+              else if report.status === 'accepted'
+                span.bg-green-700.text-white.text-xs.px-3.py-1.rounded-full Aceptada
+              else
+                span.bg-red-700.text-white.text-xs.px-3.py-1.rounded-full Rechazada
+
+            if report.Post
+              div.border-t.border-gray-700.pt-4
+                h3.text-white.text-lg.font-semibold.mb-2
+                  | #{report.Post.title}
+
+                if report.Post.description
+                  p.text-gray-400.mb-3= report.Post.description
+
+                p.text-gray-400.text-sm
+                  | Autor:
+                  if report.Post.Author
+                    span.text-indigo-400.ml-1
+                      | @#{report.Post.Author.userName}
+                  else
+                    span.ml-1 Usuario desconocido
+
+                a.inline-block.mt-3.text-indigo-400(
+                  href=`/publicaciones/${report.Post.idPost}`
+                  class='hover:text-indigo-300'
+                  target='_blank'
+                ) Ver publicación
+
+            div.mt-5.bg-gray-700.rounded-lg.p-4
+              h3.text-white.font-semibold.mb-2 Datos de la denuncia
+
+              p.text-gray-300.text-sm.mb-2
+                | Motivo:
+                span.text-white.ml-1= report.reason
+
+              if report.description
+                p.text-gray-300.text-sm.mb-2
+                  | Descripción:
+                p.text-white.text-sm= report.description
+
+              p.text-gray-400.text-sm
+                | Denunciado por:
+                if report.Reporter
+                  span.text-indigo-400.ml-1
+                    | @#{report.Reporter.userName}
+                else
+                  span.ml-1 Usuario desconocido
+
+              p.text-gray-500.text-xs.mt-3
+                | Fecha: #{new Date(report.createdAt).toLocaleString()}
+
+            if report.status === 'pending'
+              div.flex.flex-wrap.gap-3.mt-5
+                form(
+                  action=`/moderacion/${report.idReport}/aceptar`
+                  method='POST'
+                  onsubmit='return confirm("¿Aceptar esta denuncia?")'
+                )
+                  button.bg-green-700.text-white.px-4.py-2.rounded(
+                    type='submit'
+                    class='hover:bg-green-600'
+                  ) Aceptar denuncia
+
+                form(
+                  action=`/moderacion/${report.idReport}/rechazar`
+                  method='POST'
+                  onsubmit='return confirm("¿Rechazar esta denuncia?")'
+                )
+                  button.bg-red-700.text-white.px-4.py-2.rounded(
+                    type='submit'
+                    class='hover:bg-red-600'
+                  ) Rechazar denuncia
+    else
+      div.bg-gray-800.rounded-lg.p-8.text-center
+        p.text-gray-300.text-lg No hay denuncias registradas.
