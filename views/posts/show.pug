@@ -12,6 +12,7 @@ block content
     if post
       div.bg-gray-800.rounded-lg.overflow-hidden
 
+        //- GALERÍA DE FOTOS
         if post.Photos && post.Photos.length > 0
           div.p-4
             div.relative.flex.items-center.justify-center
@@ -38,6 +39,7 @@ block content
           if post.description
             p.text-gray-400.mb-4= post.description
 
+          //- ETIQUETAS
           if post.Tags && post.Tags.length > 0
             div.flex.flex-wrap.gap-2.mb-4
               each tag in post.Tags
@@ -69,7 +71,7 @@ block content
                 if Number(currentUser.idUser) !== Number(post.idUser)
                   form(
                     id='formValoracion'
-                    action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/rating`
+                    action='/publicaciones/' + post.idPost + '/fotos/' + post.Photos[0].idPhoto + '/rating'
                     method='POST'
                   )
                     p.text-gray-300.text-sm.mb-2
@@ -86,12 +88,11 @@ block content
                         button.text-3xl.transition-colors(
                           type='button'
                           data-valor=numero
-                          aria-label=`Valorar con ${numero} estrellas`
-                          class=puntuacionActual >= numero ? 'text-yellow-400' : 'text-gray-500'
+                          aria-label='Valorar con #{numero} estrellas'
+                          class=(puntuacionActual >= numero ? 'text-yellow-400' : 'text-gray-500')
                         ) ★
 
                     input#score(type='hidden' name='score' value=puntuacionActual)
-
                 else
                   p.text-gray-400.text-sm.mt-3
                     | No podés valorar tu propia publicación.
@@ -112,7 +113,7 @@ block content
               if post.Photos[0].commentsActive
                 if currentUser
                   form(
-                    action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios`
+                    action='/publicaciones/' + post.idPost + '/fotos/' + post.Photos[0].idPhoto + '/comentarios'
                     method='POST'
                   )
                     div.flex.gap-2
@@ -135,23 +136,21 @@ block content
                       class='hover:text-indigo-300'
                     ) iniciá sesión.
 
-                //- Solo el autor puede cerrar los comentarios
-                if currentUser && Number(currentUser.idUser) === Number(post.idUser)
+              //- Solo el autor puede cerrar o abrir los comentarios
+              if currentUser && Number(currentUser.idUser) === Number(post.idUser)
+                if post.Photos[0].commentsActive
                   form.mt-2(
-                    action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/cerrar`
+                    action='/publicaciones/' + post.idPost + '/fotos/' + post.Photos[0].idPhoto + '/comentarios/cerrar'
                     method='POST'
                   )
                     button.text-red-400.text-sm(type='submit')
                       | Cerrar comentarios
+                else
+                  p.text-gray-500.text-sm
+                    | Comentarios cerrados
 
-              else
-                p.text-gray-500.text-sm
-                  | Comentarios cerrados
-
-                //- Solo el autor puede abrirlos nuevamente
-                if currentUser && Number(currentUser.idUser) === Number(post.idUser)
                   form.mt-2(
-                    action=`/publicaciones/${post.idPost}/fotos/${post.Photos[0].idPhoto}/comentarios/abrir`
+                    action='/publicaciones/' + post.idPost + '/fotos/' + post.Photos[0].idPhoto + '/comentarios/abrir'
                     method='POST'
                   )
                     button.text-indigo-400.text-sm(type='submit')
@@ -165,7 +164,7 @@ block content
                       div.flex.items-center.justify-between.mb-2
                         if comment.Author
                           a.text-indigo-400.font-semibold.text-sm(
-                            href=`/perfil/${comment.Author.idUser}`
+                            href='/perfil/' + comment.Author.idUser
                             class='hover:text-indigo-300'
                           )
                             | @#{comment.Author.userName}
@@ -185,17 +184,62 @@ block content
           p.text-gray-500.text-sm.mt-4
             | Publicado el: #{new Date(post.createdAt).toLocaleDateString()}
 
+          //- DENUNCIAR PUBLICACIÓN
+          if currentUser && Number(currentUser.idUser) !== Number(post.idUser)
+            div.mt-6.bg-gray-700.rounded-lg.p-4
+              h3.text-white.text-lg.font-semibold.mb-3
+                | ¿Encontraste algo inapropiado?
+
+              details
+                summary.text-red-400.cursor-pointer(class='hover:text-red-300')
+                  | Denunciar publicación
+
+                form.mt-4(
+                  action='/publicaciones/' + post.idPost + '/denunciar'
+                  method='POST'
+                )
+                  label.block.text-gray-300.text-sm.mb-2(for='reason')
+                    | Motivo de la denuncia
+
+                  select#reason.w-full.bg-gray-800.text-white.rounded.px-3.py-2.mb-3(
+                    name='reason'
+                    required
+                  )
+                    option(value='') Seleccioná un motivo
+                    option(value='Contenido inapropiado') Contenido inapropiado
+                    option(value='Acoso o violencia') Acoso o violencia
+                    option(value='Spam o publicidad') Spam o publicidad
+                    option(value='Suplantación de identidad') Suplantación de identidad
+                    option(value='Otro') Otro
+
+                  label.block.text-gray-300.text-sm.mb-2(for='description')
+                    | Descripción adicional (opcional)
+
+                  textarea#description.w-full.bg-gray-800.text-white.rounded.px-3.py-2(
+                    name='description'
+                    rows='3'
+                    maxlength='1000'
+                    placeholder='Contanos por qué querés denunciar esta publicación...'
+                  )
+
+                  button.mt-3.bg-red-700.text-white.rounded.px-4.py-2(
+                    type='submit'
+                    onclick='return confirm("¿Estás seguro de que querés denunciar esta publicación?")'
+                    class='hover:bg-red-600'
+                  )
+                    | Enviar denuncia
+
           //- EDITAR Y ELIMINAR: solamente el autor
           if currentUser && Number(currentUser.idUser) === Number(post.idUser)
             div.flex.gap-3.mt-6
               a.bg-indigo-600.text-gray-200.rounded.px-4.py-2(
-                href=`/publicaciones/${post.idPost}/editar`
+                href='/publicaciones/' + post.idPost + '/editar'
                 class='hover:bg-indigo-700 transition-colors'
               )
                 | Editar
 
               form(
-                action=`/publicaciones/${post.idPost}/eliminar`
+                action='/publicaciones/' + post.idPost + '/eliminar'
                 method='POST'
                 onsubmit='return confirm("¿Eliminar esta publicación?")'
               )
@@ -210,83 +254,84 @@ block content
         p
           | Publicación no encontrada
 
-    script.
-      var fotos = !{fotos};
-      var actual = 0;
+  //- SCRIPTS
+  script.
+    var fotos = !{fotos};
+    var actual = 0;
 
-      function anterior() {
-        actual = actual - 1;
-        actual = actual < 0 ? fotos.length - 1 : actual;
+    function anterior() {
+      actual = actual - 1;
+      actual = actual < 0 ? fotos.length - 1 : actual;
 
-        document.getElementById('fotoActual').src = fotos[actual];
-        document.getElementById('indice').innerHTML = actual + 1;
-      }
+      document.getElementById('fotoActual').src = fotos[actual];
+      document.getElementById('indice').innerHTML = actual + 1;
+    }
 
-      function siguiente() {
-        actual = actual + 1;
-        actual = actual >= fotos.length ? 0 : actual;
+    function siguiente() {
+      actual = actual + 1;
+      actual = actual >= fotos.length ? 0 : actual;
 
-        document.getElementById('fotoActual').src = fotos[actual];
-        document.getElementById('indice').innerHTML = actual + 1;
-      }
+      document.getElementById('fotoActual').src = fotos[actual];
+      document.getElementById('indice').innerHTML = actual + 1;
+    }
 
-      var prevBtn = document.getElementById('prev');
-      var nextBtn = document.getElementById('next');
+    var prevBtn = document.getElementById('prev');
+    var nextBtn = document.getElementById('next');
 
-      if (fotos && fotos.length > 1 && prevBtn && nextBtn) {
-        prevBtn.onclick = anterior;
-        nextBtn.onclick = siguiente;
-      } else {
-        if (prevBtn) prevBtn.style.display = 'none';
-        if (nextBtn) nextBtn.style.display = 'none';
-      }
+    if (fotos && fotos.length > 1 && prevBtn && nextBtn) {
+      prevBtn.onclick = anterior;
+      nextBtn.onclick = siguiente;
+    } else {
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+    }
 
-      //- VALORACION AUTOMATICA CON ESTRELLAS
-      var contenedorEstrellas = document.getElementById('estrellas');
+    // VALORACIÓN AUTOMÁTICA CON ESTRELLAS
+    var contenedorEstrellas = document.getElementById('estrellas');
 
-      if (contenedorEstrellas) {
-        var estrellas = contenedorEstrellas.querySelectorAll('button[data-valor]');
-        var inputScore = document.getElementById('score');
-        var formValoracion = document.getElementById('formValoracion');
+    if (contenedorEstrellas) {
+      var estrellas = contenedorEstrellas.querySelectorAll('button[data-valor]');
+      var inputScore = document.getElementById('score');
+      var formValoracion = document.getElementById('formValoracion');
 
-        var puntuacion = Number(contenedorEstrellas.dataset.puntuacion) || 0;
-        var enviando = false;
+      var puntuacion = Number(contenedorEstrellas.dataset.puntuacion) || 0;
+      var enviando = false;
 
-        function pintarEstrellas(valor) {
-          estrellas.forEach(function(estrella) {
-            var numero = Number(estrella.dataset.valor);
-
-            if (numero <= valor) {
-              estrella.classList.add('text-yellow-400');
-              estrella.classList.remove('text-gray-500');
-            } else {
-              estrella.classList.remove('text-yellow-400');
-              estrella.classList.add('text-gray-500');
-            }
-          });
-        }
-
+      function pintarEstrellas(valor) {
         estrellas.forEach(function(estrella) {
-          estrella.addEventListener('click', function() {
-            if (enviando) return;
+          var numero = Number(estrella.dataset.valor);
 
-            puntuacion = Number(this.dataset.valor);
-            inputScore.value = puntuacion;
-            enviando = true;
+          if (numero <= valor) {
+            estrella.classList.add('text-yellow-400');
+            estrella.classList.remove('text-gray-500');
+          } else {
+            estrella.classList.remove('text-yellow-400');
+            estrella.classList.add('text-gray-500');
+          }
+        });
+      }
 
-            pintarEstrellas(puntuacion);
+      estrellas.forEach(function(estrella) {
+        estrella.addEventListener('click', function() {
+          if (enviando) return;
 
-            formValoracion.submit();
-          });
+          puntuacion = Number(this.dataset.valor);
+          inputScore.value = puntuacion;
+          enviando = true;
 
-          estrella.addEventListener('mouseenter', function() {
-            pintarEstrellas(Number(this.dataset.valor));
-          });
+          pintarEstrellas(puntuacion);
 
-          estrella.addEventListener('mouseleave', function() {
-            pintarEstrellas(puntuacion);
-          });
+          formValoracion.submit();
         });
 
-        pintarEstrellas(puntuacion);
-      }
+        estrella.addEventListener('mouseenter', function() {
+          pintarEstrellas(Number(this.dataset.valor));
+        });
+
+        estrella.addEventListener('mouseleave', function() {
+          pintarEstrellas(puntuacion);
+        });
+      });
+
+      pintarEstrellas(puntuacion);
+    }
